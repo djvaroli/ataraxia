@@ -20,7 +20,7 @@ The first useful release includes all five discovery categories. Implementation 
 | Motivation | Clear progress, personal milestones, optional streak display, small completion animation | Points, levels, challenges, a small growing garden |
 | Discoveries | One word, artwork, historical event, mind insight, and ML paper per local day | Topic preferences, more sources, occasional extra discoveries |
 | Library | Automatic history, category/date filters, text search, favorites, read/unread state | Notes, collections, active recall, spaced repetition |
-| Access | One Firebase identity, mobile web UI, persistent session | Installable PWA, offline reading |
+| Access | One manually provisioned Firebase email/password account, sign-in only, mobile web UI, persistent session | Installable PWA, offline reading |
 | Data | Persistent storage and a portable JSON export; backups before regular use | Import UI and a database migration if needs change |
 
 Do not add social features, public profiles, competitive leaderboards, native mobile apps, a conversational coach, or push notifications to the initial release. There is no clinical assessment or personalized medical guidance in the mind category.
@@ -84,6 +84,8 @@ Default to recent-first compact rows grouped by discovery date. Offer category c
 
 ### Settings and first use
 
+The owner creates their account in the Firebase console before use. The app has an email/password sign-in screen and sign-out; it has no registration, invitation, or account-management flow. Disable end-user sign-up in Firebase settings as well. Password resets and account maintenance are handled through Firebase administration for this release.
+
 On first sign-in, confirm the IANA time zone suggested by the browser, then invite creation of the first habit. Default to English. All five discovery categories start enabled; individual categories can be disabled later without deleting their history. Include export, sign-out, and an optional streak-display toggle. Changes to category selection affect unpublished slots and future days; ready cards stay in history.
 
 ## Habit behavior
@@ -119,9 +121,9 @@ The default experience emphasizes returning after a gap and visible accumulated 
 | Artwork | Image when available with usable rights, title, artist or culture, approximate date, medium, 80–150 words of context, and a viewing prompt |
 | History | Event, actual date/year, location where known, 80–150 words on what happened and why it mattered; “On this day” only when the date matches |
 | Mind | Clear question or idea, 100–180 words, a concrete everyday connection, and an evidence limitation when relevant |
-| ML paper | Exact title, authors/year, a 100–180 word plain-language abstract summary, why it is interesting, one supported limitation, and links to the paper record and full text |
+| ML paper | Exact title, authors/year, a 100–180 word plain-language abstract summary, why it is interesting, a limitation when the supplied source supports one, and links to the paper record and full text |
 
-Lengths are targets rather than rigid UI constraints. Show paper summaries as summaries; do not label generated text as the authors' original abstract. Detail screens can include a link to the original abstract. Learning about psychedelics, neurological disease, cognition, emotions, and mental health fits within the mind category as educational content.
+Lengths are targets rather than rigid UI constraints. An artwork card can be shorter when only factual collection metadata is available. Show paper summaries as summaries; do not label generated text as the authors' original abstract or invent a limitation to fill the layout. Detail screens can include a link to the original abstract. Learning about psychedelics, neurological disease, cognition, emotions, and mental health fits within the mind category as educational content.
 
 Randomness means varied selection from eligible sources, with repeat suppression and a balance of subjects. It does not mean every work or event in existence has an equal selection probability. Selection, sources, and failure behavior are specified in [Daily discoveries](discoveries.md).
 
