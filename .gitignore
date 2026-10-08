@@ -1,0 +1,3 @@
+# Local session context; never commit personal checkpoints.
+/.HANDOFF
+/.handoff/

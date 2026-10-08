@@ -34,3 +34,11 @@ These are implementation defaults unless revised. The LLM provider/model, spendi
 Start with issue A01 in [Delivery and operations](docs/delivery.md). The A-series identifiers are local backlog IDs, not published GitHub issue numbers. Turn the drafts into GitHub issues when implementation begins, preserve their dependencies, and reference them from pull requests.
 
 When behavior or a material decision changes, update the relevant document in the same pull request. Keep routine implementation choices in code and short docstrings rather than expanding the design indefinitely.
+
+## Session skills
+
+Use [$ataraxia-handoff](.agents/skills/ataraxia-handoff/SKILL.md) to save a local
+checkpoint, and [$ataraxia-resume](.agents/skills/ataraxia-resume/SKILL.md) to verify
+it and continue in a fresh session. [Session continuity](docs/session-continuity.md)
+defines the shared record format. `.HANDOFF` and `.handoff/` stay local and are
+excluded from Git.

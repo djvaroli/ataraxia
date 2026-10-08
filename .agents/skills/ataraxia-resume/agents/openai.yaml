@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ataraxia Resume"
+  short_description: "Resume Ataraxia from a saved checkpoint"
+  default_prompt: "Use $ataraxia-resume to verify the saved Ataraxia checkpoint and continue its agreed next increment."
