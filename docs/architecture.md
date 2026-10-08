@@ -13,9 +13,9 @@ The application serves one owner on one host. Horizontal scaling, distributed wo
 | Remote state | TanStack Query | Centralize fetching, invalidation, pending state, and mutation rollback; component state handles local UI. |
 | Backend | FastAPI, Pydantic, Python type annotations | Explicit request/response contracts and a thin HTTP layer over application services. |
 | Storage | Redis with AOF, RDB snapshots, and a named volume | Matches the requested starting point; small data volume makes simple indexes adequate. |
-| Background work | One worker process from the backend image | Keeps slow external calls out of API handlers without introducing Celery or another broker. |
-| Authentication | Firebase Authentication with Google sign-in | One familiar sign-in flow, with identity verification and authorization in the API. |
-| Edge | nginx on one origin | Routes the frontend, API, and Firebase auth helper; terminates TLS at deployment. |
+| Background work | One sequential worker process from the backend image | Checks today's five slots and keeps slow external calls out of API handlers. |
+| Authentication | Firebase Authentication with email/password sign-in | The owner creates the account manually; end-user sign-up is disabled and the API checks its UID. |
+| Edge | nginx on one origin | Routes the frontend and API; terminates TLS at deployment. |
 | Tooling | uv, npm lockfile, pytest, Ruff, mypy, Vitest, Testing Library | Familiar tools with small, behavior-focused checks. Pin supported runtime and dependency versions during implementation. |
 
 Vite supports React/TypeScript project templates and a production build workflow. This choice avoids adding a server-rendering framework to a private client application. See the [Vite guide](https://vite.dev/guide/).
@@ -36,7 +36,6 @@ flowchart LR
     Phone --> Auth[Firebase Authentication]
     Edge --> Frontend[Static React frontend]
     Edge --> API[FastAPI API]
-    Edge --> Helper[Firebase auth helper]
     API --> Verify[Firebase token verification]
     API --> Redis[(Redis and persistent volume)]
     Worker[Discovery worker] --> Redis
@@ -106,7 +105,7 @@ Use UUIDs for application records and stable external IDs for source deduplicati
 | Habit | ID, owner UID, name, cue/description, color, start date, schedule versions, timestamps |
 | Schedule version | Effective local date, enabled flag, selected ISO weekdays; an archive is a disabled version |
 | Completion | Habit ID, local date, UTC completion timestamp; absence means incomplete |
-| Daily slot | Owner UID, local date, category, state, item ID when ready, attempt count, retry time, lease and bounded error code |
+| Daily slot | Owner UID, local date, category, state, item ID when ready, attempt count, next attempt time, bounded error code |
 | Discovery item | ID, owner UID, discovery date, generation time zone, category, source identity, title, summary, typed category payload, sources, generation metadata |
 | Discovery annotation | Item ID, favorite flag, read timestamp, optional reported-content concern |
 | Source reference | Provider/record ID, URL, title, retrieved timestamp, attribution/license metadata where applicable, bounded supporting extract or normalized facts |
@@ -129,11 +128,12 @@ Use core Redis types; no Redis modules are needed. Illustrative keys:
 | `...:item:{id}` and `...:annotation:{id}` | JSON documents |
 | `...:history` and `...:history:{category}` | Sorted sets of item IDs by discovery date ordinal |
 | `...:seen:{category}` | Source identity set to suppress repeated selections |
-| `ataraxia:v1:jobs:due` | Sorted set of job keys by next eligible UTC execution time |
+
+The single worker reads today's category slots directly. A slot's state and next attempt time are sufficient to find work; no separate job index, queue, or lease records are needed.
 
 History uses a stable `(date, item_id)` cursor, so categories published on the same day are not skipped at page boundaries. For a single user's collection, search can filter bounded batches from the date index without adding a search engine. Cap page size and return the next cursor. Add indexes only when real response times justify them.
 
-Durable records and history have no TTL. Only locks and disposable source caches expire. Use Redis transactions for related writes; use `WATCH` with a small bounded retry where a read must be conditional. Publishing an item, attaching it to its daily slot, recording its source identity, and updating history are one repository operation. No external API calls occur inside a transaction.
+Durable records and history have no TTL; disposable source caches can expire. Use Redis transactions for related writes; use `WATCH` with a small bounded retry where a read must be conditional. Publishing an item, attaching it to its daily slot, recording its source identity, and updating history are one repository operation. No external API calls occur inside a transaction.
 
 Completion uses explicit set/delete operations on its unique habit/date field. It is naturally idempotent. Writes to existing records must check ownership using the authenticated UID, not an owner identifier supplied in the request.
 
@@ -177,11 +177,13 @@ Generate frontend API types from FastAPI's OpenAPI schema during the build workf
 
 ## Authentication and basic security
 
-Use Firebase Google sign-in and persist the session through the Firebase browser SDK. Send a Firebase ID token in the Authorization bearer header. The backend verifies the token for this application's Firebase project and requires its UID to match a configured owner UID. A successful Google sign-in alone does not grant application access. [Firebase token verification](https://firebase.google.com/docs/auth/admin/verify-id-tokens) describes the Admin SDK verification flow.
+Use Firebase email/password authentication with a single account created manually by the owner in the Firebase console. Enable only the email/password provider and disable end-user account creation in Authentication Settings. See Firebase's [manual account creation](https://support.google.com/firebase/answer/6400802?hl=en) and [user self-service controls](https://firebase.google.com/docs/auth/users#user_self-service).
 
-Provision the owner identity and configure the UID before use. Do not let “the first person to sign in” claim ownership. An email may help display the account, but authorization uses UID. A blocked user receives no profile, habits, content, or generation access.
+The app presents an email/password form using `signInWithEmailAndPassword`, and a sign-out action. The Firebase browser SDK manages session persistence and token refresh. Registration, invitations, and account-management screens are outside the app; the owner handles password resets and maintenance through Firebase administration. Credentials go directly to Firebase rather than through the application's API. See [Firebase password sign-in](https://firebase.google.com/docs/auth/web/password-auth).
 
-For mobile Google sign-in, use redirect flow with the app domain as `authDomain` and nginx proxying `/__/auth/` to the dedicated Firebase project's auth helper. Register the app domain and redirect URI. Keep these routes ahead of the SPA fallback. This follows Firebase's documented solution for browsers that block third-party storage. See [redirect best practices](https://firebase.google.com/docs/auth/web/redirect-best-practices). Verify it on iOS Safari and Android Chrome before use.
+Send the current Firebase ID token in the Authorization bearer header. The backend verifies it for this application's Firebase project and requires its UID to equal `OWNER_FIREBASE_UID`, configured from the manually created account. An unset owner UID fails closed; the first sign-in cannot claim ownership. A valid token for another UID grants no profile, habits, content, or generation access. [Firebase token verification](https://firebase.google.com/docs/auth/admin/verify-id-tokens) describes the Admin SDK flow.
+
+During setup, verify the provisioned account can sign in and end-user registration is rejected by Firebase. This password flow needs no OAuth redirects or nginx auth-helper routes. Manually check sign-in, session persistence, and sign-out on a phone.
 
 Use HTTPS outside local development, same-origin API requests, input length/date-range limits, and a conservative rate limit on generation endpoints. Render generated content as escaped text or a restricted Markdown subset; do not render raw source HTML. Source fetchers use approved HTTPS hosts and check redirects rather than fetching arbitrary model-supplied URLs.
 
