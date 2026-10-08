@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ataraxia Handoff"
+  short_description: "Save Ataraxia context for the next session"
+  default_prompt: "Use $ataraxia-handoff to save the current Ataraxia workstream for a fresh session."
