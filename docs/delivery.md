@@ -30,9 +30,9 @@ Acceptance: one documented Compose command starts the development stack; nginx s
 
 Labels: `feature`. Milestone: M1. Dependencies: A01.
 
-Add Firebase Google sign-in, verified bearer tokens, an explicit allowed UID, and profile settings for time zone, enabled categories, and streak visibility. Provide a local Firebase emulator profile. Document dedicated project/owner setup and nginx auth-helper routing.
+Add Firebase email/password sign-in for the account the owner manually creates in the Firebase console, verified bearer tokens, an explicit allowed UID, and profile settings for time zone, enabled categories, and streak visibility. Disable end-user sign-up in Firebase settings. The app provides sign-in/sign-out only; password resets and account maintenance stay in Firebase administration. Use a fake identity verifier for automated tests; a local Firebase emulator profile is optional if it helps development.
 
-Acceptance: missing/invalid tokens and a valid non-owner identity cannot access data or generation; the owner can sign in/out and persist preferences; the time zone is validated. Test auth policy with fakes and manually verify the actual redirect flow on mobile before M3. Test configuration cannot silently authorize users in deployment.
+Acceptance: missing/invalid tokens, an unset owner UID, and a valid non-owner identity cannot access data or generation. The provisioned owner can sign in/out, keep a session across reloads, and persist preferences; the time zone is validated. Verify end-user registration is rejected by Firebase during setup. Test auth policy with fakes and manually verify sign-in on mobile before M3. Test configuration cannot silently authorize users in deployment.
 
 ### A03 Implement habit rules and storage
 
@@ -54,15 +54,15 @@ Acceptance: a user can complete or undo directly from Today and correct a past c
 
 Labels: `feature`. Milestone: M2. Dependencies: A01, A02.
 
-Create typed category payloads, daily slots, history indexes, source identities, annotations, and worker orchestration using deterministic fake sources and generation. Implement scheduling, current-day ensure, bounded retries, claim recovery, and atomic publication.
+Create typed category payloads, daily slots, history indexes, source identities, annotations, and worker orchestration using deterministic fake sources and generation. One worker scans today's five slots and processes work sequentially. Implement scheduling, current-day ensure, persistent attempt/call limits, restart recovery, and atomic publication.
 
-Acceptance: one ready item per date/category; refreshing and re-requesting do not duplicate it; a crash/expired claim can be recovered; an unavailable category leaves others and habits usable. History is retained automatically, including unread items. Source/LLM calls never run inside the API request handler.
+Acceptance: one ready item per date/category; refreshing and re-requesting do not duplicate it; a restart recovers interrupted work without resetting attempts or call counts; an unavailable category leaves others and habits usable. History is retained automatically, including unread items. Source/LLM calls never run inside the API request handler. Document that only one worker may run at a time.
 
 ### A06 Connect sources and one LLM provider
 
 Labels: `feature`. Milestone: M2. Dependencies: A05.
 
-Implement the category sources in [Daily discoveries](discoveries.md), seed/fallback records, structured generation, source validation, repeat suppression, and usage accounting. Select one provider/model and set an explicit spending ceiling; record these choices in configuration and the runbook.
+Implement the category sources in [Daily discoveries](discoveries.md), seed/fallback records, structured generation, source validation, repeat suppression, and basic usage logging. Select one provider/model and call/token caps that fit the owner's budget; record these choices in configuration and the runbook.
 
 Acceptance: all five categories produce source-backed cards; exact titles/IDs/links come from fetched records; source failure and malformed model output fail gracefully; retry cannot bypass limits. Check current source endpoints, attribution requirements, and provider terms during implementation. Manually inspect a few cards per category and keep sanitized parsing fixtures. Confirm how the candidate pool is replenished.
 
@@ -78,7 +78,7 @@ Acceptance: all five categories render on a phone; Library finds older words, ar
 
 Labels: `quality`. Milestone: M3. Dependencies: A03, A07.
 
-Implement a versioned JSON export, final targeted integration checks, and a small operations view or status command for generation errors, usage, and storage health. Complete setup documentation and verify the app on a phone.
+Implement a versioned JSON export and final targeted integration checks. Document how to inspect generation errors/usage, storage health, and backup status using logs and simple commands; an operations UI is unnecessary for the first release. Complete setup documentation and verify the app on a phone.
 
 Acceptance: export contains all durable domain records and provenance, and its schema is documented. Run the test strategy below, manually verify sign-in → habit → discovery → history → export, and check container recreation preserves data. No real provider credentials are needed in CI. Fix concrete accessibility and error-state issues found during this pass.
 
@@ -97,15 +97,15 @@ Use small tests that exercise observable behavior. Test domain rules with a fixe
 | Layer | Useful checks |
 | --- | --- |
 | Habit unit tests | Selected weekdays, past corrections, future rejection, tomorrow-effective edits, archive/restore, incomplete today, zero-opportunity windows, representative timezone/DST boundary |
-| Content unit tests | Repeat identity normalization, supplied-source-only output, category validation, budget exhaustion, attempts including manual retries, stable published slots |
+| Content unit tests | Repeat identity normalization, supplied-source-only output, category validation, call limits, attempts including manual retries, stable published slots |
 | Auth/API unit tests | Owner allowlist, rejected identity, ownership lookup, request validation and error mapping |
 | Frontend component tests | Completion/undo and rollback, calendar status labels, category payload rendering, favorite/filter interaction |
-| Redis integration tests | Repository round trip/idempotent completion; atomic publication/history with a shared-date page boundary; expired-job recovery |
+| Redis integration tests | Repository round trip/idempotent completion; atomic publication/history with a shared-date page boundary; interrupted-slot recovery |
 | Thin HTTP integration check | Authenticate with a controlled test identity, create a habit, complete it, retrieve calendar/history through the real API and Redis |
 
 Run integration checks in a Compose test profile against a separate disposable Redis volume and project name. The API check uses dependency overrides or the Firebase emulator, fake content sources, and a fake LLM; it does not contact paid providers. Keep fixtures isolated and teardown explicit so tests cannot operate on personal data.
 
-CI should run formatting/lint checks, Python and TypeScript typechecks, unit/component tests, frontend build, and this small integration set. Keep external source smoke checks opt-in and manual because network/provider availability should not destabilize ordinary CI. Manually test mobile Google sign-in and a real generated sample before deployment.
+CI should run formatting/lint checks, Python and TypeScript typechecks, unit/component tests, frontend build, and this small integration set. Keep external source smoke checks opt-in and manual because network/provider availability should not destabilize ordinary CI. Manually test the provisioned account's mobile sign-in and a real generated sample before deployment.
 
 Container recreation, an initial migration dry run, and the restore drill are release checks, not a large continuous failure-injection suite. Add regression tests when real bugs justify them.
 
@@ -113,7 +113,7 @@ Container recreation, an initial migration dry run, and the restore drill are re
 
 A small single Linux host running Docker Compose is the initial deployment shape. The hosting provider and machine size remain setup choices. Firebase handles identity; no Firebase database or managed application platform is required. GCP is the backup destination and may also host the VM if convenient.
 
-Use immutable image versions or digests for deployments, restart policies, healthchecks, TLS renewal, and bounded log retention. Track API errors, worker heartbeat, last successful generation, Redis persistence status, disk/memory usage, and backup age. Structured logs and a simple owner-only status command/page are sufficient; do not add an observability stack initially.
+Use pinned image versions, restart policies, healthchecks, TLS renewal, and bounded log retention. Simple logs and documented commands should expose API/worker errors, last successful generation, Redis persistence status, disk/memory usage, and backup age. A dashboard or observability stack is unnecessary initially. Run one worker; stop the old process before starting its replacement.
 
 Store secrets outside Git and mount them or inject them at runtime. On GCP prefer an attached identity; elsewhere use an explicit app-specific credential mechanism. Do not silently borrow the developer machine's active GCP project. Example environment files contain placeholders only.
 
@@ -123,17 +123,17 @@ Before a schema-changing deployment, take a recoverable snapshot, run the versio
 
 Development can proceed with local persistent Redis only. Before regular use, add a backup Compose service or scheduled container command that produces and uploads a completed RDB snapshot to a private bucket in the dedicated project. Keeping an AOF or a volume on the same host is not an off-host backup.
 
-Initial targets are a daily off-host snapshot, at most roughly 24 hours of data loss after complete host loss, and a restore achievable within a couple of hours using the runbook. These are design targets to verify, not guarantees. The local AOF reduces ordinary restart loss but does not improve the age of an off-host snapshot.
+Take one off-host snapshot each day and keep 30 days of snapshots. A current daily backup means roughly one day's work could be lost after complete host loss; a failed backup can increase that gap. The local AOF reduces ordinary restart loss but does not improve the age of an off-host snapshot. Verify the actual recovery procedure with an initial restore drill.
 
 The backup process should:
 
 1. Trigger or await a fresh Redis RDB snapshot and confirm successful completion through persistence status.
-2. Copy the completed snapshot to staging, calculate a checksum, and record timestamp, Redis version, application schema version, and record counts.
-3. Upload under a unique timestamped object name with the manifest; verify the uploaded object metadata/checksum before reporting success.
-4. Retain daily snapshots for 14 days and separately marked weekly snapshots for eight weeks, with cleanup handled by a small explicit retention policy.
-5. Surface failures and backup age through a simple status check; retain enough recent local staging data for troubleshooting without exhausting disk.
+2. Copy the completed snapshot to staging and record the timestamp and Redis/application schema versions in a small companion file.
+3. Upload under a unique timestamped object name; use checksum verification before reporting success.
+4. Apply one 30-day lifecycle rule to the snapshot prefix and companion files, and clean up local staging files after successful upload.
+5. Log failures and the last successful backup time so a simple status check shows whether backups are current.
 
-Use a private bucket and narrowly scoped identities. A backup writer should not need project-wide administration; grant restore access to a separate operator identity. Configure object lifecycle rules deliberately for the chosen daily/weekly prefixes. See [Cloud Storage IAM roles](https://cloud.google.com/storage/docs/access-control/iam-roles) and [object lifecycle management](https://cloud.google.com/storage/docs/lifecycle).
+Use a private bucket and an app-specific backup identity with only the bucket permissions needed to upload and verify objects. The owner can restore through their existing administrative access; a separate operator account is unnecessary. Configure the retention rule on the backup prefix. See [Cloud Storage IAM roles](https://cloud.google.com/storage/docs/access-control/iam-roles) and [object lifecycle management](https://cloud.google.com/storage/docs/lifecycle).
 
 Restore into an empty volume using the compatible pinned Redis version and documented RDB import procedure. Ensure an old AOF cannot override the restored snapshot; validate the loaded records before enabling normal persistence and application writes. Run the app against the isolated restored store, check representative records and counts, then document cutover. Do not overwrite the live volume during a drill.
 
@@ -145,7 +145,7 @@ Backups include saved text, provenance, and image URLs, not permanent copies of 
 | --- | --- | --- |
 | Final app name | Ataraxia as the working name | Visual polish or deployment |
 | LLM provider/model and currency budget | One low-cost structured-output model, bounded calls/tokens | A06 live integration |
-| Owner UID, time zone, Firebase project | Dedicated project; browser-suggested time zone confirmed in app | A02 live sign-in |
+| Owner UID, time zone, Firebase project | Dedicated project, manually created email/password account, end-user sign-up disabled; time zone confirmed in app | A02 live sign-in |
 | Host, domain, TLS provisioning | One Compose host | A09 |
 | Backup project, bucket, identity | Dedicated GCP resources independent of Osmy | A09, before regular use |
 | More intensive game mechanics | Supportive milestones first | Review after actual use |
