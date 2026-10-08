@@ -19,7 +19,7 @@ Read the product document first. The other documents specify enough to begin imp
 
 ## Initial decisions
 
-- One user, mobile first, with Firebase Google sign-in and a backend UID allowlist.
+- One user, mobile first, with Firebase email/password sign-in. The owner manually creates the account in Firebase; end-user sign-up is disabled and the backend accepts only the configured owner UID.
 - React, TypeScript, and Vite for the frontend; FastAPI for the backend.
 - Redis as the initial persistent database, with repositories separating storage from application behavior.
 - nginx as the public entry point; separate frontend, API, worker, and Redis containers managed through Docker Compose.
