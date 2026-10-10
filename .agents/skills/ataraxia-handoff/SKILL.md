@@ -1,6 +1,6 @@
 ---
 name: ataraxia-handoff
-description: Save an Ataraxia workstream for a fresh session in a local .HANDOFF, preserving earlier checkpoints in .handoff/. Use when asked to hand off, save session context, or prepare to resume later.
+description: Save an Ataraxia workstream for a fresh session in the repository's .HANDOFF, preserving earlier checkpoints in .handoff/. Use when asked to hand off, save session context, or prepare to resume later.
 ---
 
 # Ataraxia handoff
@@ -37,6 +37,7 @@ remains open, label a reasonable default rather than creating an approval gate.
 Use the shared history procedure to archive the previous brief unchanged and replace
 the current brief. Read the saved file back and verify its local references.
 Keep useful evidence in the brief or history instead of depending on temporary files.
+The brief and completed history belong in Git; temporary `.tmp` drafts stay ignored.
 
 Handoff saves context only. Do not commit, stash, discard changes, publish a PR,
 merge, provision cloud resources, or start the next implementation step as part of
@@ -44,6 +45,7 @@ this skill unless the user separately requested that action.
 
 ## Report
 
-Report the local handoff path, checkpoint, next action, and any actual blocker.
-State that the records belong to this worktree and are not included in a clone.
-Give the fresh-session invocation `$ataraxia-resume` from this worktree.
+Report the handoff path, checkpoint, next action, and any actual blocker.
+State whether the record changes are committed or still local; committed records
+travel with the branch in clones and worktrees. Give the fresh-session invocation
+`$ataraxia-resume` from the checkout containing that checkpoint.

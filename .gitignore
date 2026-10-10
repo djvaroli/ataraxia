@@ -1,6 +1,5 @@
-# Local session context; never commit personal checkpoints.
-/.HANDOFF
-/.handoff/
+# Incomplete handoff drafts; completed records are tracked.
+/.handoff/**/*.tmp
 
 # Local configuration and build output.
 .env
