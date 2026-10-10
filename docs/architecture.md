@@ -53,7 +53,7 @@ Readiness checks verify Redis connectivity; liveness checks verify that the proc
 
 ## Code organization and responsibilities
 
-The following is a planned layout, not directories to scaffold in the design session:
+The following is the target layout. A01 implements the API/worker entry points, shared configuration, frontend shell, and infrastructure. Domain and application modules arrive with their use cases; see [Local development](development.md) for the current commands.
 
 ```text
 backend/
@@ -152,7 +152,7 @@ Use explicit schema migrations when records change. A small versioned migration 
 
 ## API outline
 
-All application routes are under `/api/v1` and require an authorized identity. `GET` requests do not start paid generation. Derive the UID from verified authentication and the current local date from the stored profile.
+All application routes are under `/api/v1` and require an authorized identity. The infrastructure-only `/api/health/live` and `/api/health/ready` routes are public and contain only a status. A01 has no application routes yet. `GET` requests do not start paid generation. Derive the UID from verified authentication and the current local date from the stored profile.
 
 | Endpoint family | Behavior |
 | --- | --- |

@@ -1,3 +1,18 @@
 # Local session context; never commit personal checkpoints.
 /.HANDOFF
 /.handoff/
+
+# Local configuration and build output.
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo

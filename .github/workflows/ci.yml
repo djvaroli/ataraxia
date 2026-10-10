@@ -1,0 +1,19 @@
+name: Foundation checks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Formatting, lint, types, unit tests, build, and API contract
+        run: bash scripts/check
+      - name: Isolated Compose smoke check
+        run: python3 scripts/smoke.py

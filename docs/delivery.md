@@ -2,7 +2,7 @@
 
 Build a useful habit tracker first, then connect daily discoveries and their Library. Keep the application runnable with deterministic fixtures before adding external credentials. Backups can be absent throughout development, but automated backups to a dedicated GCP project and a successful restore are required before relying on the app for personal history.
 
-The design session produces documentation only. The following are GitHub issue drafts for future implementation; their A-series identifiers are local references, not existing GitHub issue numbers.
+The following are implementation backlog items; their A-series identifiers are local references, separate from GitHub issue numbers. A01 is implemented with commands in [Local development](development.md) and tracked in [issue #8](https://github.com/djvaroli/ataraxia/issues/8); A02–A09 remain future work.
 
 ## Milestones and issue workflow
 
@@ -12,13 +12,15 @@ The design session produces documentation only. The following are GitHub issue d
 | M2 Daily learning works | A05–A07 | All five categories, bounded generation, durable Library |
 | M3 Ready for personal use | A08–A09 | Export, targeted checks, HTTPS deployment, backup and restore |
 
-Create GitHub issues from the drafts below as implementation starts. Use labels such as `feature`, `infra`, `quality`, and `later`, plus milestone and dependency links. A pull request references its issue, explains the resulting behavior, and lists relevant validation. Keep each change reviewable; a broad issue may be delivered through a few small pull requests. Do not create an issue for every helper function.
+When external publication is authorized, create GitHub issues from the drafts below. Use labels such as `feature`, `infra`, `quality`, and `later`, plus milestone and dependency links. A pull request references its issue, explains the resulting behavior, and lists relevant validation. Keep each change reviewable; a broad issue may be delivered through a few small pull requests. Do not create an issue for every helper function.
 
 Update these design documents when an implementation changes a user-visible rule or a material technical decision. Keep setup commands, environment variables, and runbooks close to their eventual implementation. Major decision reversals can get a short ADR; routine library or function choices do not need one.
 
 ## Initial GitHub issue drafts
 
 ### A01 Establish the runnable project
+
+Tracking: [issue #8](https://github.com/djvaroli/ataraxia/issues/8).
 
 Labels: `infra`. Milestone: M1. Dependencies: none.
 

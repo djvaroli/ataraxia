@@ -4,7 +4,35 @@ Ataraxia is a personal development app for building habits and encountering some
 
 This is an independent project, entirely separate from Osmy. The working name comes from this repository and can change.
 
-Status: design only, 8 October 2026. Application code, infrastructure, and cloud resources have not been created.
+Status: A01 runnable foundation, 10 October 2026. The app shell, API health endpoints, idle worker, and persistent Redis run through Docker Compose. Authentication, habits, and discoveries are the next increments; no cloud resources are required yet.
+
+## Run locally
+
+With Docker Engine and Docker Compose v2.20+ installed, run from this directory:
+
+```sh
+docker compose -f compose.yaml -f compose.dev.yaml up --build --detach --wait
+```
+
+Open [localhost:8080](http://localhost:8080). nginx is the only published service and binds to loopback. Source edits reload the frontend and API; restart the worker after editing it. No environment file or credentials are needed for this foundation. Copy `.env.example` to `.env` if you need to change the port.
+
+```sh
+curl --fail http://localhost:8080/api/health/ready
+docker compose down
+```
+
+Stopping the stack retains Redis data. See [Local development](docs/development.md) for compiled builds, logs, configuration, and storage details.
+
+## Validate
+
+These commands use the locked dependencies and pinned container runtimes. Checks do not require Firebase or an LLM provider:
+
+```sh
+bash scripts/check
+python3 scripts/smoke.py
+```
+
+The first runs formatting, lint, Python/TypeScript typechecks, tests, the frontend build, and generated API contract checks. The second checks real nginx routing, private service ports, Redis persistence, and failure recovery in its own disposable Compose project. Both remove only their temporary containers and volumes. CI runs the same commands.
 
 ## Design documents
 
@@ -31,7 +59,7 @@ These are implementation defaults unless revised. The LLM provider/model, spendi
 
 ## Implementation handoff
 
-Start with issue A01 in [Delivery and operations](docs/delivery.md). The A-series identifiers are local backlog IDs, not published GitHub issue numbers. Turn the drafts into GitHub issues when implementation begins, preserve their dependencies, and reference them from pull requests.
+[A01 — issue #8](https://github.com/djvaroli/ataraxia/issues/8) establishes this foundation; A02 in [Delivery and operations](docs/delivery.md) adds owner authentication and preferences next. The A-series identifiers are local backlog IDs, separate from GitHub issue numbers. Create external issues and pull requests when publication is authorized, preserving those dependencies.
 
 When behavior or a material decision changes, update the relevant document in the same pull request. Keep routine implementation choices in code and short docstrings rather than expanding the design indefinitely.
 

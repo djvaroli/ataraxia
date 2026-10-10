@@ -1,0 +1,83 @@
+name: ataraxia
+
+x-service: &service
+  restart: unless-stopped
+  logging:
+    driver: json-file
+    options:
+      max-size: 10m
+      max-file: "3"
+
+x-health: &health
+  interval: 5s
+  timeout: 4s
+  retries: 3
+  start_period: 10s
+
+services:
+  nginx:
+    <<: *service
+    image: nginx:1.30.5-alpine
+    ports:
+      - "127.0.0.1:${ATARAXIA_HTTP_PORT:-8080}:80"
+    volumes:
+      - ./infra/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      frontend:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    healthcheck:
+      <<: *health
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/api/health/ready"]
+
+  frontend:
+    <<: *service
+    build:
+      context: ./frontend
+      target: runtime
+    healthcheck:
+      <<: *health
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/_health"]
+
+  api:
+    <<: *service
+    build: &backend-build
+      context: ./backend
+      target: runtime
+    environment: &backend-env
+      ATARAXIA_REDIS_URL: redis://redis:6379/0
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      <<: *health
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health/ready', timeout=3)"]
+
+  worker:
+    <<: *service
+    build: *backend-build
+    command: ["python", "-m", "ataraxia.worker"]
+    environment: *backend-env
+    init: true
+    stop_grace_period: 10s
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      <<: *health
+      test: ["CMD", "python", "-m", "ataraxia.worker.healthcheck"]
+
+  redis:
+    <<: *service
+    image: redis:8.10.2-alpine
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    volumes:
+      - ./infra/redis.conf:/usr/local/etc/redis/redis.conf:ro
+      - redis-data:/data
+    healthcheck:
+      <<: *health
+      test: ["CMD", "redis-cli", "ping"]
+
+volumes:
+  redis-data:

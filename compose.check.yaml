@@ -1,0 +1,17 @@
+# Always run with a disposable --project-name; see scripts/check and smoke.py.
+services:
+  backend-check:
+    profiles: [check]
+    build:
+      context: ./backend
+      target: development
+    command:
+      - sh
+      - -ec
+      - ruff format --check . && ruff check . && mypy src tests && pytest -q
+  frontend-check:
+    profiles: [check]
+    build:
+      context: ./frontend
+      target: development
+    command: [npm, run, check]
