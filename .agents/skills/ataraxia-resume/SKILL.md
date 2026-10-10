@@ -16,6 +16,9 @@ Confirm the repository and worktree with `pwd`, `git rev-parse --show-toplevel`,
 `.HANDOFF`, or the source the user explicitly selected. If it is missing or
 identifies a different workstream, report that and resolve the intended checkpoint
 before implementation. Do not silently substitute another checkout's latest file.
+Committed records travel with the branch; a recorded worktree path may refer to the
+original checkout. Verify the repository and workstream rather than requiring that
+machine-specific path to match.
 
 Read the brief's necessary references and the relevant current design documents.
 Inspect the actual files and local changes before treating planned work as
@@ -52,6 +55,6 @@ or merge PRs, deploy, or provision Firebase/GCP resources; honor any authorizati
 already given for the workstream. Do not require Osmy review skills or automatic
 sub-agents.
 
-At the agreed stopping point, refresh the local checkpoint with
+At the agreed stopping point, refresh the repository checkpoint with
 `ataraxia-handoff`, unless the user asked for read-only work or no handoff update.
 Report the outcome, verification, remaining work, and handoff location.
