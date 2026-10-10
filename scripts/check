@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+task_project="ataraxia-check-$(date +%s)-$$"
+compose=(docker compose --project-name "$task_project" -f compose.yaml -f compose.check.yaml --profile check)
+trap '"${compose[@]}" down --volumes --remove-orphans' EXIT
+"${compose[@]}" run --build --rm --no-deps backend-check
+"${compose[@]}" run --build --rm --no-deps frontend-check
+
+# Check the committed contract without requiring Redis or a running API.
+task_schema=$("${compose[@]}" run --rm --no-deps backend-check python -m ataraxia.api.export_schema)
+diff -u frontend/openapi.json <(printf '%s\n' "$task_schema")
+"${compose[@]}" run --rm --no-deps frontend-check sh -ec \
+  'cp src/lib/api.generated.ts /tmp/api.generated.ts; npm run generate:api; diff -u /tmp/api.generated.ts src/lib/api.generated.ts'
