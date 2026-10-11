@@ -68,6 +68,6 @@ When behavior or a material decision changes, update the relevant document in th
 Use [$ataraxia-handoff](.agents/skills/ataraxia-handoff/SKILL.md) to save a
 checkpoint, and [$ataraxia-resume](.agents/skills/ataraxia-resume/SKILL.md) to verify
 it and continue in a fresh session. [Session continuity](docs/session-continuity.md)
-defines the shared record format. The current checkpoint in [.HANDOFF](.HANDOFF)
+defines the shared record format. The current checkpoint in [.HANDOFF.md](.HANDOFF.md)
 and history in [.handoff/](.handoff/) are tracked in Git and travel with the branch
 once committed. Temporary handoff drafts (`*.tmp`) remain ignored.

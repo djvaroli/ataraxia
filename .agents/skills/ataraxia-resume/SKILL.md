@@ -1,6 +1,6 @@
 ---
 name: ataraxia-resume
-description: Resume an Ataraxia workstream from a saved .HANDOFF in a fresh session, verify current state, and continue the agreed next increment. Use for saved-session resumption, not ordinary continuation or requests to inspect or edit the skill.
+description: Resume an Ataraxia workstream from a saved .HANDOFF.md in a fresh session, verify current state, and continue the agreed next increment. Use for saved-session resumption, not ordinary continuation or requests to inspect or edit the skill.
 ---
 
 # Ataraxia resume
@@ -13,7 +13,7 @@ when present.
 
 Confirm the repository and worktree with `pwd`, `git rev-parse --show-toplevel`,
 `git status --short --branch`, and `git worktree list`. Read this worktree's
-`.HANDOFF`, or the source the user explicitly selected. If it is missing or
+`.HANDOFF.md`, or the source the user explicitly selected. If it is missing or
 identifies a different workstream, report that and resolve the intended checkpoint
 before implementation. Do not silently substitute another checkout's latest file.
 Committed records travel with the branch; a recorded worktree path may refer to the
