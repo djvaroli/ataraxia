@@ -29,8 +29,10 @@ Keep screen-reader polish and speculative infrastructure outside automatic fixes
 Do not defer unresolved security or data-loss risks silently. Validate fixes and
 re-review changed risk paths; stop repeated ineffective attempts with a clear blocker.
 
-Prepare and publish the resulting PR stack under the user's implementation request,
-with correct bases, merge order, checks, review dispositions, and a short manual trial.
+Prepare and publish the resulting native GitHub stack under the user's implementation
+request, with correct bases, checks, review dispositions, and a short manual trial.
+Register and verify the stack through GitHub as described in the delivery loop;
+record its actual stack number and PR order. Dependent branches alone are insufficient.
 Do not post separate review comments unless explicitly requested; findings can be
 summarized in the PR body. Reconcile remote state before retrying publication so
 retries do not create duplicate PRs or issues. Update the roadmap's factual status

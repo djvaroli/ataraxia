@@ -7,14 +7,14 @@ work. This is the delivery policy; no recurring runner is enabled by this docume
 ## One increment
 
 1. Read `AGENTS.md`, the roadmap, relevant acceptance, and the current handoff.
-   Verify remote PR bases/heads and local changes. Continue an existing stack before
-   starting another. Use a separate worktree when the checkout has unrelated work.
-2. Choose one authorized roadmap increment. Prefer a stack of small, coherent,
-   runnable PRs for dependent changes or an increment that benefits from separate
+   Verify native stack membership, remote PR bases/heads, and local changes. Continue
+   an existing stack before starting another. Use a separate worktree for unrelated work.
+2. Choose one authorized roadmap increment. Prefer a native GitHub stack of small,
+   coherent, runnable PRs for dependent changes or an increment that benefits from separate
    reviews. Keep a small self-contained change in one PR. Use `codex/` branches;
    the first PR targets the integration branch (normally `main`), and each dependent
-   PR targets its actual parent branch. Record parent links and bottom-to-top merge
-   order in PR descriptions and the handoff. Begin with one active stack.
+   PR targets its actual parent branch. Record parent links and bottom-to-top order
+   in PR descriptions and the handoff. Begin with one active stack.
 3. Implement behavior, focused unit tests, and concise docs together. Keep external
    services behind narrow injected contracts. Use fixtures while credentials or
    provider choices are unavailable; never let test identities authorize deployed users.
@@ -31,18 +31,38 @@ work. This is the delivery policy; no recurring runner is enabled by this docume
    when acceptance holds, relevant checks pass, and no material finding remains
    unresolved. A reviewer label alone does not justify a fix or deferral. Security
    and data-loss problems must be fixed or explicitly surfaced as blockers.
-7. Open/update the PRs and include outcome, test evidence, review disposition,
+7. Open/update the PRs; register dependent PRs in a native GitHub stack. Verify its number,
+   membership, and order. Include outcome, test evidence, review disposition,
    follow-up links, and a short manual trial. After a parent changes or merges,
-   restack affected descendants, retarget their bases as needed, and verify that
+   reconcile GitHub's stack state and restack/retarget descendants as needed. Verify
    each diff contains only its own increment. Recheck affected behavior and CI;
    preserve unrelated work and never overwrite another contributor's commits.
-   Save a handoff and report the final stack with merge order. Leave merging and
-   application acceptance to the owner.
+   Save a handoff and report the verified native stack number and PR order. Leave
+   merging and application acceptance to the owner.
 
 If review/fix cycles make no progress, capture the exact blocker instead of looping
 indefinitely. After two unsuccessful attempts at the same failure, change approach
 or report the unresolved condition. Ask only when a material product decision,
 authorization, or missing resource prevents further useful work.
+
+## Native GitHub stacks
+
+Dependent branches alone do not create a GitHub stack. Use the
+[stacks API](https://docs.github.com/en/rest/pulls/stacks) through `gh api`:
+
+- Check `GET /repos/{owner}/{repo}/stacks?pull_request={pr_number}` before creating
+  or retrying. Reuse the existing stack when present.
+- Create with `POST /repos/{owner}/{repo}/stacks`, passing `pull_requests` as integer
+  PR numbers ordered bottom to top. Each dependent base must match its parent's head.
+- Extend with `POST /repos/{owner}/{repo}/stacks/{stack_number}/add`, passing only
+  the new PR numbers in order.
+- Verify with `GET /repos/{owner}/{repo}/stacks/{stack_number}` and each PR's `stack`
+  metadata. Record the returned stack `number` separately from PR numbers and global `id`.
+
+Use `Accept: application/vnd.github+json` and `X-GitHub-Api-Version: 2026-03-10`.
+If registration is unavailable, report the blocker instead of claiming a completed stack.
+The owner can [merge a contiguous group through GitHub's stack UI](https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/merging-stacked-pull-requests).
+Reconcile GitHub's automatic rebasing before making local branch changes.
 
 ## Scope of automatic fixes
 

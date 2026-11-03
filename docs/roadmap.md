@@ -5,9 +5,10 @@ durable history. Acceptance lives in [delivery](delivery.md); product rules live
 in [product](product.md). This file tracks outcomes without copying those specs.
 
 Status verified on 2 November 2026: A01 is merged; A02–A09 have no implementation.
-The open stack is [#11](https://github.com/djvaroli/ataraxia/pull/11), the handoff
+Native GitHub stack **#13** contains [#11](https://github.com/djvaroli/ataraxia/pull/11), the handoff
 filename fix, followed by [#12](https://github.com/djvaroli/ataraxia/pull/12), the
-agent workflow setup. Merge in that order; neither is part of `main` yet.
+agent workflow setup. Membership and order are verified through GitHub's API.
+Both await the owner's stack review and merge; neither is part of `main` yet.
 
 | Item | Outcome | Depends on | State |
 | --- | --- | --- | --- |

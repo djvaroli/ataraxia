@@ -12,4 +12,4 @@
 
 <!-- Short user-facing test steps and expected result. -->
 
-<!-- For a stack: parent PR, actual base branch, and merge order. -->
+<!-- For a native GitHub stack: verified stack number, parent PR, base branch, and PR order. -->
