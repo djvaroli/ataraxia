@@ -6,6 +6,11 @@ This is an independent project, entirely separate from Osmy. The working name co
 
 Status: A01 runnable foundation, 10 October 2026. The app shell, API health endpoints, idle worker, and persistent Redis run through Docker Compose. Authentication, habits, and discoveries are the next increments; no cloud resources are required yet.
 
+See the [current roadmap](docs/roadmap.md) for verified progress and the next increment.
+Contributors and coding agents follow [AGENTS.md](AGENTS.md) and the
+[agent delivery loop](docs/agent-workflow.md): implement, review, fix, and present a
+finished PR stack for the owner's merge and application trial.
+
 ## Run locally
 
 With Docker Engine and Docker Compose v2.20+ installed, run from this directory:
