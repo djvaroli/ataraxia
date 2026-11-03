@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ataraxia Build"
+  short_description: "Build, review, fix, and prepare an Ataraxia PR stack"
+  default_prompt: "Use $ataraxia-build to complete the next Ataraxia increment through review and fixes."

@@ -12,7 +12,11 @@ The following are implementation backlog items; their A-series identifiers are l
 | M2 Daily learning works | A05–A07 | All five categories, bounded generation, durable Library |
 | M3 Ready for personal use | A08–A09 | Export, targeted checks, HTTPS deployment, backup and restore |
 
-When external publication is authorized, create GitHub issues from the drafts below. Use labels such as `feature`, `infra`, `quality`, and `later`, plus milestone and dependency links. A pull request references its issue, explains the resulting behavior, and lists relevant validation. Keep each change reviewable; a broad issue may be delivered through a few small pull requests. Do not create an issue for every helper function.
+Use the [agent delivery loop](agent-workflow.md) for implementation, review, automatic
+remediation, and actionable deferred issues. The agent owns routine implementation
+and review fixes; the owner reviews and merges the finished stack. Create feature
+issues when useful, preserving the dependencies below. A PR explains the resulting
+behavior and relevant validation. Do not create an issue for every helper function.
 
 Update these design documents when an implementation changes a user-visible rule or a material technical decision. Keep setup commands, environment variables, and runbooks close to their eventual implementation. Major decision reversals can get a short ADR; routine library or function choices do not need one.
 
@@ -50,7 +54,7 @@ Labels: `feature`. Milestone: M1. Dependencies: A03.
 
 Build Today, habit creation/editing, the month calendar, weekly consistency, completion milestones, and optional streak display. Use shared date/status components and optimistic updates with rollback.
 
-Acceptance: a user can complete or undo directly from Today and correct a past calendar day; filled circles match persisted data after reload; a failed request restores the correct UI state. Verify a 360-pixel viewport, keyboard interaction, screen-reader labels, and reduced motion. Archive and past corrections remain discoverable.
+Acceptance: a user can complete or undo directly from Today and correct a past calendar day; filled circles match persisted data after reload; a failed request restores the correct UI state. Verify a 360-pixel viewport, usable controls, and keyboard interaction. Preserve semantic HTML and existing reduced-motion support; dedicated screen-reader polish is deferred. Archive and past corrections remain discoverable.
 
 ### A05 Implement discovery storage and the worker with fixtures
 
@@ -82,7 +86,7 @@ Labels: `quality`. Milestone: M3. Dependencies: A03, A07.
 
 Implement a versioned JSON export and final targeted integration checks. Document how to inspect generation errors/usage, storage health, and backup status using logs and simple commands; an operations UI is unnecessary for the first release. Complete setup documentation and verify the app on a phone.
 
-Acceptance: export contains all durable domain records and provenance, and its schema is documented. Run the test strategy below, manually verify sign-in → habit → discovery → history → export, and check container recreation preserves data. No real provider credentials are needed in CI. Fix concrete accessibility and error-state issues found during this pass.
+Acceptance: export contains all durable domain records and provenance, and its schema is documented. Run the test strategy below, manually verify sign-in → habit → discovery → history → export, and check container recreation preserves data. No real provider credentials are needed in CI. Fix concrete usability and error-state issues found during this pass; dedicated screen-reader polish remains deferred.
 
 ### A09 Deploy independently and enable GCP recovery
 
