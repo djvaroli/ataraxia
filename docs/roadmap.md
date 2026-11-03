@@ -5,13 +5,14 @@ durable history. Acceptance lives in [delivery](delivery.md); product rules live
 in [product](product.md). This file tracks outcomes without copying those specs.
 
 Status verified on 2 November 2026: A01 is merged; A02–A09 have no implementation.
-The only open PR at inspection was [#11](https://github.com/djvaroli/ataraxia/pull/11),
-the handoff filename fix. The workflow setup in this branch builds on it.
+The open stack is [#11](https://github.com/djvaroli/ataraxia/pull/11), the handoff
+filename fix, followed by [#12](https://github.com/djvaroli/ataraxia/pull/12), the
+agent workflow setup. Merge in that order; neither is part of `main` yet.
 
 | Item | Outcome | Depends on | State |
 | --- | --- | --- | --- |
 | A01 | Start the app shell, API, worker, and durable Redis locally | — | Done: [#9](https://github.com/djvaroli/ataraxia/pull/9) |
-| Workflow setup | Shared skills, repo standards, and a review/fix delivery loop | A01 | In progress in this branch |
+| Workflow setup | Shared skills, repo standards, and a review/fix delivery loop | A01 | In review: [#12](https://github.com/djvaroli/ataraxia/pull/12) |
 | A02 | Owner signs in and saves preferences | A01 | Next; implementation not started |
 | A03 | Habit rules and storage preserve completion/schedule history | A02 | Planned |
 | A04 | Track habits from Today and a mobile calendar | A03 | Planned |
