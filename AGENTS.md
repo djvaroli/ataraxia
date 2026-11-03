@@ -38,8 +38,14 @@ for the current task. Verify Git/PR state before trusting a handoff.
 
 ## Delivery and review
 
-- Use `codex/` branches and isolated worktrees when work overlaps. Keep each PR
-  runnable and coherent, with its actual stack base, checks, and a short test recipe.
+- Prefer stacked PRs when related changes have dependencies or a larger increment
+  benefits from smaller reviews. Keep each PR coherent and runnable; use a single
+  PR for a small self-contained change. Use `codex/` branches and isolated worktrees
+  when work overlaps.
+- Base the first PR on the integration branch and each dependent PR on its parent
+  branch. Record parent links and merge order. After parent updates or merges,
+  restack affected descendants and verify their bases, incremental diffs, and checks.
+  Include a short test recipe for each PR; preserve unrelated work when restacking.
 - Follow [the agent delivery loop](docs/agent-workflow.md). Run independent code
   review for implementation changes, security review for trust/data/execution changes,
   and design review for consequential design decisions. Use the shared review skills

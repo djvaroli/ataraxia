@@ -9,9 +9,12 @@ work. This is the delivery policy; no recurring runner is enabled by this docume
 1. Read `AGENTS.md`, the roadmap, relevant acceptance, and the current handoff.
    Verify remote PR bases/heads and local changes. Continue an existing stack before
    starting another. Use a separate worktree when the checkout has unrelated work.
-2. Choose one authorized roadmap increment. Split only when the intermediate PRs
-   are coherent and runnable. Use `codex/` branches; each dependent PR targets its
-   actual parent branch. Record merge order. Begin with one active stack.
+2. Choose one authorized roadmap increment. Prefer a stack of small, coherent,
+   runnable PRs for dependent changes or an increment that benefits from separate
+   reviews. Keep a small self-contained change in one PR. Use `codex/` branches;
+   the first PR targets the integration branch (normally `main`), and each dependent
+   PR targets its actual parent branch. Record parent links and bottom-to-top merge
+   order in PR descriptions and the handoff. Begin with one active stack.
 3. Implement behavior, focused unit tests, and concise docs together. Keep external
    services behind narrow injected contracts. Use fixtures while credentials or
    provider choices are unavailable; never let test identities authorize deployed users.
@@ -29,8 +32,12 @@ work. This is the delivery policy; no recurring runner is enabled by this docume
    unresolved. A reviewer label alone does not justify a fix or deferral. Security
    and data-loss problems must be fixed or explicitly surfaced as blockers.
 7. Open/update the PRs and include outcome, test evidence, review disposition,
-   follow-up links, and a short manual trial. Save a handoff and report the final
-   stack with merge order. Leave merging and application acceptance to the owner.
+   follow-up links, and a short manual trial. After a parent changes or merges,
+   restack affected descendants, retarget their bases as needed, and verify that
+   each diff contains only its own increment. Recheck affected behavior and CI;
+   preserve unrelated work and never overwrite another contributor's commits.
+   Save a handoff and report the final stack with merge order. Leave merging and
+   application acceptance to the owner.
 
 If review/fix cycles make no progress, capture the exact blocker instead of looping
 indefinitely. After two unsuccessful attempts at the same failure, change approach
