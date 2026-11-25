@@ -15,8 +15,9 @@ Every lesson starts as a row in `generation_jobs`:
 | `topic` | "Ask for any topic" | The owner's words (up to 300 characters); Claude picks the subject from the catalog |
 | `follow_up` | "Go deeper" on a lesson | Parent lesson, plus a suggested direction or the owner's question (up to 500 characters) |
 
-The API only inserts jobs. It refuses a new job (429) when today's calls have reached
-`ATARAXIA_MAX_LESSONS_PER_DAY` (default 8) or three jobs are already waiting. There is
+The API only inserts jobs. It refuses a new job (429) when today's counted calls plus
+the queued jobs (each will make at least one call) have reached
+`ATARAXIA_MAX_LESSONS_PER_DAY` (default 8), or three jobs are already queued or running. There is
 at most one `daily` job per local date (unique index), so a repeated ensure request is
 harmless.
 
@@ -31,7 +32,8 @@ The worker is one process running a simple loop every few seconds:
    `generation_calls` row, and only then call Claude.
 4. Validate the result, look up illustrations, and publish the lesson, its state row,
    the job result, and a `lesson.prepared` event in one transaction.
-5. Write a heartbeat to `worker_status` every loop.
+5. Write a heartbeat to `worker_status` every few seconds from a separate thread, so a
+   long call does not look like a dead worker.
 
 Only one worker may run. A crash during a call can waste one call; the calls table
 still counts it.
