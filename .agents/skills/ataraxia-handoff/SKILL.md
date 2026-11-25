@@ -1,6 +1,6 @@
 ---
 name: ataraxia-handoff
-description: Save an Ataraxia workstream for a fresh session in the repository's .HANDOFF, preserving earlier checkpoints in .handoff/. Use when asked to hand off, save session context, or prepare to resume later.
+description: Save an Ataraxia workstream for a fresh session in the repository's .HANDOFF.md, preserving earlier checkpoints in .handoff/. Use when asked to hand off, save session context, or prepare to resume later.
 ---
 
 # Ataraxia handoff
@@ -13,7 +13,7 @@ when present.
 
 Confirm the current repository and worktree with `pwd`, `git rev-parse
 --show-toplevel`, `git status --short --branch`, and `git worktree list`. Use this
-worktree's `.HANDOFF` unless the user selected another reading source. Resolve a
+worktree's `.HANDOFF.md` unless the user selected another reading source. Resolve a
 material repository or workstream mismatch before writing.
 
 Read the current brief and relevant history. Reconcile them with this session,

@@ -129,7 +129,7 @@ Randomness means varied selection from eligible sources, with repeat suppression
 
 ## Accessibility and failure states
 
-Design for a 360-pixel-wide phone, comfortable text, visible focus, semantic buttons, at least 44-pixel touch targets, and light/dark themes. Support keyboard use and screen readers. Artwork uses contain-style images so the whole work can be inspected, with a full-image link. Keep reading layouts narrow enough for comfortable prose.
+Design for a 360-pixel-wide phone, comfortable text, visible focus, semantic buttons, at least 44-pixel touch targets, and light/dark themes. Support keyboard use; dedicated screen-reader audits and polish are deferred for this personal app. Artwork uses contain-style images so the whole work can be inspected, with a full-image link. Keep reading layouts narrow enough for comfortable prose.
 
 Habit completion responds optimistically, indicates a pending save, and rolls back with a concise retry message on failure. Serialize changes for the same habit/day while a save is pending and refetch authoritative state after an uncertain outcome. A network failure must not leave a false completed circle. Disable new changes while the browser reports offline; do not persist or automatically replay an offline mutation queue. Offline writes and synchronization are deferred.
 

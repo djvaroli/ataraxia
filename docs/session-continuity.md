@@ -7,12 +7,14 @@ approval for every session.
 
 ## Repository records
 
-Keep the current brief in `.HANDOFF` at the selected worktree root and older briefs
+Keep the current brief in `.HANDOFF.md` at the selected worktree root and older briefs
 or supporting notes in `.handoff/`. Track both in Git so committed records arrive
 with the branch in a clone or worktree. New or edited records remain local until
 committed; include them when committing or publishing the work they describe under
 the user's existing authorization. A handoff-only request does not itself authorize
 a commit or publication. Incomplete `.handoff/**/*.tmp` drafts are ignored.
+The `.md` suffix keeps the checkpoint distinct from the `.handoff/` directory
+on case-insensitive filesystems, including common macOS and Windows setups.
 Keep durable product and engineering decisions in the design docs.
 
 Archived records preserve what was known at the time, including superseded workflow
@@ -53,8 +55,8 @@ account details; name required configuration without copying its secret values.
 One writer per worktree is sufficient. This is a small file workflow, with no
 separate writer service or script required:
 
-1. Check `.HANDOFF` and `.handoff/` before creating or replacing them, including
-   local edits and unresolved conflicts (`git status --short -- .HANDOFF .handoff`).
+1. Check `.HANDOFF.md` and `.handoff/` before creating or replacing them, including
+   local edits and unresolved conflicts (`git status --short -- .HANDOFF.md .handoff`).
    Tracked records are expected. Refuse symlink destinations and unexpected file
    types; resolve conflicts before replacing a record. Preserve existing edits in
    the archive instead of silently discarding, untracking, or redirecting records.
@@ -63,7 +65,7 @@ separate writer service or script required:
    file and verify the copy. Never overwrite an existing historical record. On the
    first handoff there is no prior brief to archive.
 3. Write the new brief to a unique `.tmp` file inside `.handoff/`, then read it back
-   and verify the important facts and local references. Replace `.HANDOFF` by
+   and verify the important facts and local references. Replace `.HANDOFF.md` by
    renaming the prepared file only after those checks succeed. A failed write or
    failed archive leaves the previous brief intact. Incomplete `.tmp` files are
    drafts, not history.
