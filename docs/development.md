@@ -103,6 +103,18 @@ docker compose exec api python -m ataraxia.tools backup /data/backups/2026-11-24
 
 `backup` uses SQLite's online backup, so it is safe while the app runs, and writes a single self-contained file.
 
+## Frontend without the backend
+
+The frontend has a demo mode that runs against an in-memory copy of the API with sample lessons, so screens can be seen and designed without the API or worker:
+
+```sh
+docker run --rm -it -p 127.0.0.1:5173:8080 -e VITE_DEMO=1 -v "$PWD/frontend:/app" -w /app node:24.21.0-bookworm-slim npm run dev
+```
+
+Open `http://localhost:5173`. Query parameters on first load choose a state: `?scenario=ready|preparing|failed|waiting|not_scheduled|limit|new`, and `?auth=firebase` to start at sign-in (`owner@example.com` / `correct horse`). The demo code lives in `frontend/src/fake/`, is shared with the unit tests, and is left out of production builds because Vite removes the `VITE_DEMO` branch.
+
+`bash frontend/scripts/screenshots.sh <dir>` screenshots every screen in light and dark at phone and desktop width, using the Node and Playwright images.
+
 ## Checks and generated types
 
 Run the same commands as CI:
