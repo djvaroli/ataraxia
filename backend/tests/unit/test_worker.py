@@ -22,7 +22,7 @@ def test_heartbeat_recovers_after_storage_failure(tmp_path: Path) -> None:
     assert is_healthy(heartbeat)
     with database.connect() as connection:
         stored = connection.execute("SELECT heartbeat_at FROM worker_status").fetchone()
-    assert stored["heartbeat_at"] == NOW.isoformat()
+    assert datetime.fromisoformat(stored["heartbeat_at"]) == NOW
 
     database.path = tmp_path / "missing-directory" / "app.db"
     assert not record_heartbeat(database, heartbeat, NOW)

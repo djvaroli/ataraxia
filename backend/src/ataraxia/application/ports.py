@@ -2,7 +2,8 @@
 
 The worker hands a `LessonBrief` to a `LessonGenerator` and gets validated content
 back or a `GenerationError` with a job error code. Implementations: the Claude CLI
-adapter and a deterministic fake.
+adapter and a deterministic fake. The API turns a bearer token into a user ID with an
+`IdentityVerifier`.
 """
 
 from collections.abc import Sequence
@@ -24,6 +25,24 @@ from ataraxia.domain.subjects import SubjectId
 class Clock(Protocol):
     def now(self) -> datetime:
         """Current time, timezone-aware UTC."""
+        ...
+
+
+class InvalidTokenError(Exception):
+    """The token is missing, malformed, expired, or not signed by the issuer."""
+
+
+class IdentityUnavailableError(Exception):
+    """The token could not be checked now, for example the signing keys are unreachable."""
+
+
+class IdentityVerifier(Protocol):
+    def verify(self, token: str | None) -> str:
+        """Return the verified user ID for a bearer token.
+
+        Raises `InvalidTokenError` or `IdentityUnavailableError`. The caller checks
+        whether the user is the owner.
+        """
         ...
 
 
