@@ -1,0 +1,62 @@
+.sheet {
+  width: 100%;
+  max-width: var(--column);
+  max-height: min(88svh, 44rem);
+  margin: auto auto 0;
+  padding: 0;
+  border: 0;
+  border-top: 1px solid var(--rule-strong);
+  background: var(--paper);
+  color: var(--ink);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.sheet[open] {
+  animation: rise var(--medium) var(--ease);
+}
+
+.sheet::backdrop {
+  background: color-mix(in srgb, #0d0b08 38%, transparent);
+  animation: fade var(--medium) var(--ease);
+}
+
+.body {
+  padding: 0.75rem var(--gutter)
+    calc(1.75rem + env(safe-area-inset-bottom, 0px));
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.title {
+  font-size: 1.375rem;
+  line-height: 1.25;
+}
+
+@media (min-width: 40rem) {
+  .sheet {
+    margin: auto;
+    border: 1px solid var(--rule-strong);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(1.25rem);
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}

@@ -15,8 +15,9 @@ Every lesson starts as a row in `generation_jobs`:
 | `topic` | "Ask for any topic" | The owner's words (up to 300 characters); Claude picks the subject from the catalog |
 | `follow_up` | "Go deeper" on a lesson | Parent lesson, plus a suggested direction or the owner's question (up to 500 characters) |
 
-The API only inserts jobs. It refuses a new job (429) when today's calls have reached
-`ATARAXIA_MAX_LESSONS_PER_DAY` (default 8) or three jobs are already waiting. There is
+The API only inserts jobs. It refuses a new job (429) when today's counted calls plus
+the queued jobs (each will make at least one call) have reached
+`ATARAXIA_MAX_LESSONS_PER_DAY` (default 8), or three jobs are already queued or running. There is
 at most one `daily` job per local date (unique index), so a repeated ensure request is
 harmless.
 
@@ -31,7 +32,8 @@ The worker is one process running a simple loop every few seconds:
    `generation_calls` row, and only then call Claude.
 4. Validate the result, look up illustrations, and publish the lesson, its state row,
    the job result, and a `lesson.prepared` event in one transaction.
-5. Write a heartbeat to `worker_status` every loop.
+5. Write a heartbeat to `worker_status` every few seconds from a separate thread, so a
+   long call does not look like a dead worker.
 
 Only one worker may run. A crash during a call can waste one call; the calls table
 still counts it.
@@ -79,10 +81,15 @@ The worker runs the Claude Code CLI as a subprocess. Verified against version
 ```text
 claude -p --safe-mode --tools "" --strict-mcp-config --no-session-persistence
        --max-turns 3 --model <ATARAXIA_CLAUDE_MODEL>
-       --system-prompt-file <prompt file> --output-format json
+       --system-prompt <prompt text> --output-format json
        --json-schema <lesson schema>          (prompt on standard input)
 ```
 
+- The prompt text comes from `backend/src/ataraxia/adapters/prompts/lesson_system.md`.
+- The CLI turns `@path` in a prompt into that file's contents even with tools
+  disabled (verified on 2.1.332). Every `@` in the user message is followed by a
+  zero-width space, which the CLI does not treat as a mention, and the space is
+  removed from the answer. Re-check this when upgrading the CLI.
 - `--safe-mode` skips CLAUDE.md files, skills, plugins, hooks, MCP servers, and
   memory; `--tools ""` removes every built-in tool. Structured output still works
   (Claude Code returns it through its own internal tool, which is why `--max-turns`
@@ -112,7 +119,12 @@ from `CLAUDE_CODE_OAUTH_TOKEN` in `.env` when that is set. Either:
 - run `claude setup-token` on a computer with a browser (it prints a one-year token)
   and put it in `.env` as `CLAUDE_CODE_OAUTH_TOKEN`, then recreate the worker.
 
-`docker compose exec worker claude auth status` shows the current state.
+An interactive login lasts about a month (the CLI reports its end as
+`credential_expires_at`); the one-year token is the better choice on the VM.
+`docker compose exec worker claude auth status` shows the current state. The worker
+runs that check at start and every 10 minutes and records the answer, along with
+what each Claude call shows about the login, so Today can say when the worker needs
+signing in before a lesson fails.
 
 ## Lesson content
 
@@ -151,9 +163,10 @@ For each requested title the worker asks Wikipedia's Action API (`action=query`,
 `prop=pageimages|info`, `pilicense=any`, `redirects=1`, thumbnail width 1280) over
 HTTPS with a descriptive User-Agent, a 5-second timeout, and a small response limit.
 `pilicense=any` includes the non-free lead images Wikipedia itself shows (film
-posters, modern artworks); this private app displays them the same way. Only image
-URLs on `upload.wikimedia.org` are kept, with the article's canonical URL as the
-source link. Titles that do not resolve are dropped; a lesson without images is fine.
+posters, modern artworks); this private app displays them the same way. Only HTTPS
+image URLs on `upload.wikimedia.org` or `thumb.wikimedia.org` (Wikipedia now serves
+thumbnails from both) are kept, without tracking parameters, with the article's
+canonical URL as the source link. Titles that do not resolve are dropped; a lesson without images is fine.
 Wikipedia lookups never delay publication by more than about 15 seconds in total.
 
 ## Recording activity

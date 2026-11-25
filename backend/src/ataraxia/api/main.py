@@ -2,16 +2,18 @@
 
 import logging
 import sqlite3
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager
-from typing import Annotated, Literal, cast
+from typing import Annotated, Literal
 
 from fastapi import Depends, FastAPI, Request, Response
 from pydantic import BaseModel
 
 from ataraxia.adapters.sqlite.database import Database
 from ataraxia.adapters.sqlite.migrations import SCHEMA_VERSION, migrate, schema_version
-from ataraxia.bootstrap import create_database
+from ataraxia.api import routes
+from ataraxia.api.errors import install_error_handlers
+from ataraxia.bootstrap import ApiServices, create_api_services
 from ataraxia.config import Settings
 
 logger = logging.getLogger(__name__)
@@ -24,17 +26,26 @@ class HealthStatus(BaseModel):
 
 
 def get_database(request: Request) -> Database:
-    """Obtain the process database; tests can override this dependency."""
-    return cast(Database, request.app.state.database)
+    return routes.get_services(request).database
 
 
-def create_app(database: Database | None = None) -> FastAPI:
-    """Build the API; the database is opened and migrated at startup, not import."""
+def from_environment() -> ApiServices:
+    return create_api_services(Settings())
+
+
+def create_app(build: Callable[[], ApiServices] = from_environment) -> FastAPI:
+    """Build the API. Settings are read, checked, and the database migrated at
+    startup, not here, so the OpenAPI schema can be exported without configuration."""
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-        app.state.database = database or create_database(Settings())
-        migrate(app.state.database)
+        services = build()
+        migrate(services.database)
+        if services.owner.mode == "local":
+            logger.warning(
+                "Local mode: no sign-in; only requests to localhost from this machine are served"
+            )
+        app.state.services = services
         yield
 
     app = FastAPI(
@@ -45,6 +56,7 @@ def create_app(database: Database | None = None) -> FastAPI:
         redoc_url=None,
         openapi_url=None,
     )
+    install_error_handlers(app)
 
     @app.get("/api/health/live", response_model=HealthStatus)
     def live() -> HealthStatus:
@@ -66,6 +78,8 @@ def create_app(database: Database | None = None) -> FastAPI:
             return HealthStatus(status="unavailable")
         return HealthStatus(status="ok")
 
+    app.include_router(routes.public)
+    app.include_router(routes.router)
     return app
 
 

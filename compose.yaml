@@ -8,6 +8,13 @@ x-service: &service
       max-size: 10m
       max-file: "3"
 
+# The API and worker run unprivileged and never need Linux capabilities.
+x-hardened: &hardened
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+
 x-health: &health
   interval: 5s
   timeout: 4s
@@ -41,24 +48,45 @@ services:
       test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/_health"]
 
   api:
-    <<: *service
+    <<: [*service, *hardened]
     build: &backend-build
       context: ./backend
       target: runtime
-    environment: &backend-env
-      ATARAXIA_DATABASE_PATH: /data/ataraxia.db
+    environment:
+      <<: &backend-env
+        ATARAXIA_DATABASE_PATH: /data/ataraxia.db
+        ATARAXIA_DEFAULT_TIME_ZONE: ${ATARAXIA_DEFAULT_TIME_ZONE:-UTC}
+        ATARAXIA_MAX_LESSONS_PER_DAY: ${ATARAXIA_MAX_LESSONS_PER_DAY:-8}
+      # Only the development override selects local mode; never use it on the VM.
+      ATARAXIA_AUTH_MODE: ${ATARAXIA_AUTH_MODE:-firebase}
+      ATARAXIA_OWNER_UID: ${ATARAXIA_OWNER_UID:-}
+      ATARAXIA_FIREBASE_PROJECT_ID: ${ATARAXIA_FIREBASE_PROJECT_ID:-}
+      ATARAXIA_FIREBASE_API_KEY: ${ATARAXIA_FIREBASE_API_KEY:-}
+      ATARAXIA_FIREBASE_AUTH_DOMAIN: ${ATARAXIA_FIREBASE_AUTH_DOMAIN:-}
+      ATARAXIA_FIREBASE_APP_ID: ${ATARAXIA_FIREBASE_APP_ID:-}
     volumes: &backend-data
       - ataraxia-data:/data
     healthcheck:
       <<: *health
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health/ready', timeout=3)"]
 
+  # The only service with the Claude CLI and the Claude login.
   worker:
-    <<: *service
-    build: *backend-build
+    <<: [*service, *hardened]
+    build:
+      context: ./backend
+      target: worker
     command: ["python", "-m", "ataraxia.worker"]
-    environment: *backend-env
-    volumes: *backend-data
+    environment:
+      <<: *backend-env
+      ATARAXIA_GENERATOR: ${ATARAXIA_GENERATOR:-claude}
+      ATARAXIA_CLAUDE_MODEL: ${ATARAXIA_CLAUDE_MODEL:-opus}
+      ATARAXIA_CLAUDE_TIMEOUT_SECONDS: ${ATARAXIA_CLAUDE_TIMEOUT_SECONDS:-600}
+      # Optional one-year token from `claude setup-token`; otherwise the login volume.
+      CLAUDE_CODE_OAUTH_TOKEN: ${CLAUDE_CODE_OAUTH_TOKEN:-}
+    volumes:
+      - ataraxia-data:/data
+      - claude-config:/home/app/.claude
     init: true
     stop_grace_period: 10s
     depends_on:
@@ -70,3 +98,4 @@ services:
 
 volumes:
   ataraxia-data:
+  claude-config:

@@ -1,0 +1,611 @@
+.page {
+  min-height: 100svh;
+  padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
+  animation: enter var(--medium) var(--ease);
+}
+
+.status {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 4rem var(--gutter) 0;
+  display: grid;
+  gap: 1rem;
+  justify-items: start;
+  font-style: italic;
+  color: var(--ink-faint);
+}
+
+/* Top bar and reading progress */
+
+.topBar {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  padding-top: env(safe-area-inset-top, 0px);
+  background: var(--paper);
+}
+
+.topInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: var(--column);
+  margin: 0 auto;
+  padding: 0.25rem calc(var(--gutter) - 0.7rem);
+}
+
+.topActions {
+  display: flex;
+  align-items: center;
+}
+
+.progressTrack {
+  height: 1px;
+  background: var(--rule);
+}
+
+.progressLine {
+  height: 2px;
+  margin-top: -0.5px;
+  background: var(--pigment, var(--ink));
+  transform-origin: left center;
+  transition: transform 120ms linear;
+}
+
+.menu {
+  position: relative;
+}
+
+.menuList {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.25rem);
+  min-width: 13rem;
+  padding: 0.35rem 0;
+  border: 1px solid var(--rule-strong);
+  background: var(--paper);
+  display: grid;
+  animation: drop var(--fast) var(--ease);
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 1rem;
+  border: 0;
+  background: none;
+  font-family: var(--sans);
+  font-size: 0.9375rem;
+  text-align: left;
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.menuItem:hover {
+  background: var(--paper-deep);
+}
+
+/* The article */
+
+.article {
+  max-width: calc(var(--measure) + 2 * var(--gutter));
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+.header {
+  padding: clamp(1.75rem, 6vh, 3rem) 0 0;
+}
+
+.kicker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 1rem;
+  margin: 0 0 1.25rem;
+}
+
+.title {
+  font-size: clamp(2.15rem, 9.5vw, 3.25rem);
+  line-height: 1.06;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  margin-bottom: 1.25rem;
+}
+
+.hook {
+  margin: 0 0 1.5rem;
+  font-size: 1.3125rem;
+  line-height: 1.45;
+  font-style: italic;
+  font-weight: 360;
+  color: var(--ink-soft);
+}
+
+.byline {
+  margin: 0;
+  padding: 0.85rem 0 0;
+  border-top: 1px solid var(--pigment);
+}
+
+.frontispiece {
+  margin-top: 2rem;
+}
+
+/* Lesson text */
+
+.body {
+  margin-top: 2.25rem;
+  font-size: var(--text-reading);
+  line-height: var(--leading-reading);
+  font-variant-numeric: oldstyle-nums proportional-nums;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  hanging-punctuation: first allow-end last;
+}
+
+.body p,
+.body ul,
+.body ol,
+.body blockquote {
+  margin: 0 0 1.05em;
+}
+
+.body p {
+  text-wrap: pretty;
+}
+
+/* Drop cap on the first paragraph of the lesson. */
+.section:first-child > p:first-of-type::first-letter {
+  float: left;
+  margin: 0.08em 0.1em 0 -0.02em;
+  font-size: 3.55em;
+  line-height: 0.82;
+  font-weight: 400;
+  color: var(--pigment, var(--ink));
+}
+
+@supports (initial-letter: 3) or (-webkit-initial-letter: 3) {
+  .section:first-child > p:first-of-type::first-letter {
+    float: none;
+    margin: 0 0.12em 0 0;
+    font-size: inherit;
+    line-height: inherit;
+    -webkit-initial-letter: 3;
+    initial-letter: 3;
+  }
+}
+
+.body h2,
+.body h3,
+.body h4 {
+  hyphens: manual;
+  -webkit-hyphens: manual;
+  font-variant-numeric: lining-nums;
+}
+
+.body h2 {
+  margin: 2.2em 0 0.7em;
+  font-size: 1.5rem;
+  line-height: 1.2;
+  font-weight: 500;
+  letter-spacing: -0.008em;
+}
+
+.body h3 {
+  margin: 1.8em 0 0.5em;
+  font-size: 1.1875rem;
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+.body h4 {
+  margin: 1.5em 0 0.4em;
+  font-size: 1rem;
+  font-style: italic;
+  font-weight: 500;
+}
+
+.body ul,
+.body ol {
+  padding-left: 1.35em;
+}
+
+.body li {
+  margin-bottom: 0.4em;
+  padding-left: 0.2em;
+}
+
+.body li::marker {
+  color: var(--pigment, var(--ink-faint));
+}
+
+.body ol li::marker {
+  font-variant-numeric: lining-nums;
+  font-size: 0.9em;
+}
+
+.body strong {
+  font-weight: 620;
+}
+
+.body blockquote {
+  margin-left: 0;
+  margin-right: 0;
+  padding: 0.1em 0 0.1em 1.1em;
+  border-left: 2px solid var(--pigment, var(--rule-strong));
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.body blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+.body hr {
+  width: 3rem;
+  margin: 2.5em auto;
+  border: 0;
+  border-top: 1px solid var(--rule-strong);
+}
+
+.body code {
+  font-family: var(--mono);
+  font-size: 0.8em;
+  padding: 0.08em 0.3em;
+  background: var(--paper-deep);
+  border-radius: 2px;
+  font-variant-numeric: normal;
+}
+
+.body pre {
+  margin: 1.4em 0 1.6em;
+  padding: 1rem 1.1rem;
+  overflow-x: auto;
+  background: var(--paper-deep);
+  border-left: 2px solid var(--pigment, var(--rule-strong));
+  font-size: 0.78em;
+  line-height: 1.55;
+  hyphens: none;
+  -webkit-hyphens: none;
+}
+
+.body pre code {
+  padding: 0;
+  background: none;
+  font-size: inherit;
+  white-space: pre;
+}
+
+.tableWrap {
+  margin: 1.4em 0 1.6em;
+  overflow-x: auto;
+}
+
+.tableWrap table {
+  min-width: 100%;
+  border-collapse: collapse;
+  font-family: var(--sans);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  font-variant-numeric: lining-nums tabular-nums;
+  hyphens: none;
+  -webkit-hyphens: none;
+}
+
+.tableWrap th,
+.tableWrap td {
+  padding: 0.55rem 0.9rem 0.55rem 0;
+  border-bottom: 1px solid var(--rule);
+  text-align: left;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+.tableWrap th {
+  border-bottom: 1px solid var(--ink);
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+}
+
+.tableWrap th:last-child,
+.tableWrap td:last-child {
+  padding-right: 0;
+}
+
+.body :global(.katex) {
+  font-size: 1.05em;
+}
+
+.body :global(.katex-display) {
+  margin: 1.2em 0 1.4em;
+  padding: 0.25em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* End matter */
+
+.end {
+  margin-top: 3rem;
+}
+
+.fin {
+  margin: 0 0 3rem;
+  text-align: center;
+  color: var(--pigment, var(--ink-faint));
+  font-size: 1.25rem;
+  letter-spacing: 0.6em;
+}
+
+.endSection {
+  margin-bottom: 3rem;
+}
+
+.remember {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: idea;
+}
+
+.remember li {
+  position: relative;
+  counter-increment: idea;
+  padding: 0 0 1rem 2.25rem;
+  font-size: 1.125rem;
+  line-height: 1.5;
+}
+
+.remember li::before {
+  content: counter(idea, lower-roman) '.';
+  position: absolute;
+  left: 0;
+  top: 0.05em;
+  width: 1.75rem;
+  font-style: italic;
+  color: var(--pigment, var(--ink-faint));
+}
+
+.glossary {
+  margin: 0;
+  display: grid;
+  gap: 1.1rem;
+}
+
+.glossary dt {
+  font-weight: 600;
+  font-size: 1.0625rem;
+}
+
+.glossary dd {
+  margin: 0.15rem 0 0;
+  font-size: 1.0625rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.further {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 1.1rem;
+}
+
+.further li {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.furtherLink {
+  font-size: 1.125rem;
+  line-height: 1.35;
+  text-decoration-color: var(--rule-strong);
+}
+
+.furtherLink cite {
+  font-style: italic;
+}
+
+.furtherLink:hover {
+  text-decoration-color: currentColor;
+}
+
+.creator {
+  color: var(--ink-soft);
+}
+
+.furtherNote {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+.furtherSource {
+  margin: 1.25rem 0 0;
+}
+
+.marks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.5rem;
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--rule);
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.25rem 0;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+
+.rateRule {
+  width: 1px;
+  height: 1.25rem;
+  background: var(--rule-strong);
+}
+
+.rateButton {
+  min-height: 2.75rem;
+  padding: 0 0.1rem;
+  border: 0;
+  background: none;
+  font-family: var(--serif);
+  font-size: 1.0625rem;
+  font-style: italic;
+  color: var(--ink-soft);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.3em;
+  transition:
+    color var(--fast) var(--ease),
+    text-decoration-color var(--fast) var(--ease);
+}
+
+.rateButton:hover {
+  color: var(--ink);
+}
+
+.rateButton[aria-pressed='true'] {
+  color: var(--ink);
+  font-style: normal;
+  font-weight: 560;
+  text-decoration-color: var(--pigment, var(--ink));
+  text-decoration-thickness: 2px;
+}
+
+.directions {
+  margin: 0 0 0.75rem;
+  padding: 0;
+  list-style: none;
+}
+
+.directions li {
+  border-bottom: 1px solid var(--rule);
+}
+
+.directions li:first-child {
+  border-top: 1px solid var(--rule);
+}
+
+.direction {
+  display: grid;
+  gap: 0.3rem;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.95rem 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  transition: opacity var(--fast) var(--ease);
+}
+
+.direction:active {
+  opacity: 0.7;
+}
+
+.directionTitle {
+  font-family: var(--serif);
+  font-size: 1.1875rem;
+  line-height: 1.3;
+}
+
+.direction:hover .directionTitle {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  text-decoration-color: var(--pigment, var(--rule-strong));
+}
+
+.directionText {
+  font-family: var(--sans);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.thread {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.thread li {
+  display: grid;
+  grid-template-columns: 1.75rem 1fr;
+  align-items: baseline;
+  font-size: 1.0625rem;
+  line-height: 1.4;
+}
+
+.thread a {
+  text-decoration-color: var(--rule-strong);
+}
+
+.threadPart {
+  font-style: italic;
+  color: var(--pigment, var(--ink-faint));
+  font-variant-numeric: oldstyle-nums;
+}
+
+.threadCurrent {
+  font-weight: 560;
+}
+
+/* Sheets */
+
+.sheetForm {
+  display: grid;
+  gap: 1.1rem;
+}
+
+.sheetLead {
+  margin: 0;
+  font-size: 1.3125rem;
+  line-height: 1.3;
+}
+
+.sheetText {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+.sheetLead + .sheetText {
+  margin-top: 0.4rem;
+}
+
+.sheetActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@keyframes drop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}

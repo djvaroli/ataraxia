@@ -1,0 +1,40 @@
+.plate {
+  margin: 2.25rem 0;
+}
+
+.frame {
+  display: flex;
+  justify-content: center;
+}
+
+/* The width attribute is the image's natural width, so small images (some
+   posters are about 220 px wide) are never scaled up. */
+.frame img {
+  display: block;
+  max-width: 100%;
+  max-height: 70svh;
+  height: auto;
+  object-fit: contain;
+}
+
+@media (prefers-color-scheme: dark) {
+  .frame img {
+    filter: brightness(0.9);
+  }
+}
+
+.caption {
+  margin-top: 0.7rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--rule);
+  font-family: var(--sans);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--ink-faint);
+  text-wrap: pretty;
+}
+
+.source {
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
