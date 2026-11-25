@@ -1,15 +1,19 @@
 # Ataraxia
 
-Ataraxia is a personal development app for building habits and encountering something worth learning each day. Habits come first; a daily word, artwork, historical event, insight about the mind, and machine learning paper provide a small, varied reading ritual. Everything remains easy to revisit.
+Ataraxia is a private learning app: one Claude-written lesson a day on art, history,
+film, words, geography and geopolitics, science, mathematics, computer science, and
+more. Lessons start as a 10–15 minute read and can be saved, rated, and continued
+into deeper follow-ups. Every action is recorded so the history can be reviewed,
+summarized, and used to tune what comes next.
 
-This is an independent project, entirely separate from Osmy. The working name comes from this repository and can change.
+The app runs in Docker on one machine, uses the owner's Claude subscription through
+the Claude Code CLI, and is reached from a phone over a private network with Firebase
+sign-in. It is an independent project, entirely separate from Osmy.
 
-Status: A01 runnable foundation, 10 October 2026. The app shell, API health endpoints, idle worker, and persistent Redis run through Docker Compose. Authentication, habits, and discoveries are the next increments; no cloud resources are required yet.
-
-See the [current roadmap](docs/roadmap.md) for verified progress and the next increment.
+Status, 24 November 2026: the runnable shell from A01 is merged; the lessons plan
+(L01) is in review and L02–L06 follow. See the [roadmap](docs/roadmap.md).
 Contributors and coding agents follow [AGENTS.md](AGENTS.md) and the
-[agent delivery loop](docs/agent-workflow.md): implement, review, fix, and present a
-finished PR stack for the owner's merge and application trial.
+[agent delivery loop](docs/agent-workflow.md).
 
 ## Run locally
 
@@ -43,30 +47,13 @@ The first runs formatting, lint, Python/TypeScript typechecks, tests, the fronte
 
 | Document | Purpose |
 | --- | --- |
-| [Product and experience](docs/product.md) | Features, mobile screens, habit rules, motivation, and scope |
-| [Architecture and data](docs/architecture.md) | Technical decisions, service boundaries, storage, authentication, and API contracts |
-| [Daily discoveries](docs/discoveries.md) | Sources, LLM responsibilities, generation, history, and content quality |
-| [Delivery and operations](docs/delivery.md) | Build sequence, GitHub issue drafts, tests, deployment, and backups |
+| [Product and experience](docs/product.md) | The lesson loop, screens, activity record, look and feel, limits |
+| [Lessons](docs/lessons.md) | Jobs, subject choice, calling Claude, content rules, events |
+| [Architecture and data](docs/architecture.md) | Services, storage, API, authentication, security |
+| [Deployment](docs/deployment.md) | VM, private network, hardening, backups |
+| [Delivery](docs/delivery.md) | Acceptance per roadmap item and the test strategy |
 
-Read the product document first. The other documents specify enough to begin implementation without prescribing every class or component.
-
-## Initial decisions
-
-- One user, mobile first, with Firebase email/password sign-in. The owner manually creates the account in Firebase; end-user sign-up is disabled and the backend accepts only the configured owner UID.
-- React, TypeScript, and Vite for the frontend; FastAPI for the backend.
-- Redis as the initial persistent database, with repositories separating storage from application behavior.
-- nginx as the public entry point; separate frontend, API, worker, and Redis containers managed through Docker Compose.
-- A small worker selects and explains source-backed discoveries through a configurable LLM provider. Published cards are saved automatically and remain stable.
-- Simple unit tests and a few Docker integration checks. No distributed platform, large testing framework, or microservice split.
-- GCP backups are deferred during development and required, with a successful restore, before regular personal use. The GCP project, Firebase configuration, credentials, and storage must be independent of Osmy.
-
-These are implementation defaults unless revised. The LLM provider/model, spending ceiling, deployment host/domain, and dedicated GCP project remain setup decisions; they do not prevent building with fixtures. The initial motivation design uses supportive consistency and milestones, with heavier game mechanics left optional.
-
-## Implementation handoff
-
-[A01 — issue #8](https://github.com/djvaroli/ataraxia/issues/8) establishes this foundation; A02 in [Delivery and operations](docs/delivery.md) adds owner authentication and preferences next. The A-series identifiers are local backlog IDs, separate from GitHub issue numbers. Create external issues and pull requests when publication is authorized, preserving those dependencies.
-
-When behavior or a material decision changes, update the relevant document in the same pull request. Keep routine implementation choices in code and short docstrings rather than expanding the design indefinitely.
+Read the product document first.
 
 ## Session skills
 

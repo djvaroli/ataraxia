@@ -1,161 +1,100 @@
-# Ataraxia delivery and operations
+# Ataraxia delivery
 
-Build a useful habit tracker first, then connect daily discoveries and their Library. Keep the application runnable with deterministic fixtures before adding external credentials. Backups can be absent throughout development, but automated backups to a dedicated GCP project and a successful restore are required before relying on the app for personal history.
+Acceptance for each roadmap item, the test strategy, and decisions left for setup.
+Status lives in the [roadmap](roadmap.md); the delivery loop in
+[agent workflow](agent-workflow.md).
 
-The following are implementation backlog items; their A-series identifiers are local references, separate from GitHub issue numbers. A01 is implemented with commands in [Local development](development.md) and tracked in [issue #8](https://github.com/djvaroli/ataraxia/issues/8); A02–A09 remain future work.
+## Acceptance
 
-## Milestones and issue workflow
+### L01 Lessons-first plan
 
-| Milestone | Issues | Outcome |
-| --- | --- | --- |
-| M1 Habits work locally | A01–A04 | Sign in, create habits, record/undo, inspect the mobile calendar |
-| M2 Daily learning works | A05–A07 | All five categories, bounded generation, durable Library |
-| M3 Ready for personal use | A08–A09 | Export, targeted checks, HTTPS deployment, backup and restore |
+The product, lessons, architecture, deployment, and roadmap documents describe the
+lesson loop, the activity record, SQLite storage, the Claude CLI worker, and the
+security model. Superseded habit and discovery designs are removed from current docs
+(Git history keeps them).
 
-Use the [agent delivery loop](agent-workflow.md) for implementation, review, automatic
-remediation, and actionable deferred issues. The agent owns routine implementation
-and review fixes; the owner reviews and merges the finished stack. Create feature
-issues when useful, preserving the dependencies below. A PR explains the resulting
-behavior and relevant validation. Do not create an issue for every helper function.
+### L02 SQLite storage foundation
 
-Update these design documents when an implementation changes a user-visible rule or a material technical decision. Keep setup commands, environment variables, and runbooks close to their eventual implementation. Major decision reversals can get a short ADR; routine library or function choices do not need one.
+Redis is removed. The API and worker open one SQLite file on the `ataraxia-data`
+volume with WAL mode, foreign keys, and a busy timeout. Numbered migrations run at
+startup under a lock, and the app refuses a newer schema. Readiness checks a bounded
+query; the worker heartbeat reflects database contact. The smoke check proves the
+database survives container recreation and that only nginx publishes a port.
 
-## Initial GitHub issue drafts
+### L03 Owner identity, settings, lessons API, activity
 
-### A01 Establish the runnable project
+- `firebase` mode: missing/invalid/expired tokens get 401, a valid non-owner token 403,
+  and missing configuration stops the API. Verified with locally signed test tokens
+  and a fake key source; no network in unit tests.
+- `local` mode works only when set explicitly; the runtime Compose file defaults to
+  `firebase`.
+- Settings validate the time zone (IANA), subjects (catalog IDs), length, and hour.
+- Lesson requests and follow-ups create jobs and enforce the daily cap and waiting
+  limit; the daily ensure is idempotent.
+- Saved, rating, finished, flag, opened, and reading endpoints are idempotent, write
+  exactly one event per real change, and bound their inputs.
+- Library pagination is stable across lessons created in the same second; filters
+  and search work.
+- Progress returns correct streaks across time-zone day boundaries, totals, and the
+  per-subject breakdown.
+- Export contains every durable table; `python -m ataraxia.tools export` and `stats`
+  work with `--help` and useful exit codes.
+- With the fake generator selected, a requested lesson goes from queued to ready.
 
-Tracking: [issue #8](https://github.com/djvaroli/ataraxia/issues/8).
+### L04 Claude CLI lesson generation
 
-Labels: `infra`. Milestone: M1. Dependencies: none.
+- The worker image installs a pinned Claude Code version; the API image does not
+  contain it; only the worker mounts the login volume.
+- The subprocess gets the documented flags, an empty working directory, an explicit
+  environment without API-key variables, and a hard timeout.
+- Errors map to the codes in [lessons](lessons.md#attempts-and-errors); attempts and
+  the daily cap survive restarts; interrupted jobs recover.
+- The morning lesson is created once per local day after the configured hour.
+- Validation rejects out-of-range output; illustrations keep only
+  `upload.wikimedia.org` images and never block publication.
+- Unit tests use a fake CLI runner and fake Wikipedia client. A manual check generates
+  a real lesson with the owner's login before merge and records the result.
 
-Create the frontend/backend layout, locked dependencies, and Compose services for nginx, frontend, API, worker, and Redis. Add clear environment examples, healthchecks, and CI commands. Use separate entry points for API and worker; do not implement a job framework yet.
+### L05 Reading-room frontend
 
-Acceptance: one documented Compose command starts the development stack; nginx serves the frontend and proxies a health request; only intended edge ports are published; Redis uses a named volume, persistence, and no eviction. Build/lint/typecheck commands run in documented environments. No Osmy configuration or secrets are imported.
+- Sign-in (firebase mode), local-mode notice, sign-out.
+- Today shows the daily lesson in each state (none yet, waiting, preparing, ready,
+  failed with a reason) and polls only while work is waiting or running.
+- The reader renders Markdown, math, code, tables, and illustrations; records open,
+  reading time, and scroll; offers save, rating, finish, flag, and follow-ups.
+- Library filters and search; Progress streaks, totals, subjects, recent weeks;
+  Settings saves and reports errors.
+- Works at 360 px wide, in light and dark themes, with keyboard use and reduced
+  motion. Screenshots at phone width are part of the PR.
+- The runtime frontend sends a Content Security Policy and basic security headers.
 
-### A02 Add owner authentication and preferences
+### L06 Private phone access and backups
 
-Labels: `feature`. Milestone: M1. Dependencies: A01.
+The app runs on the owner's VM, reachable only over Tailscale with HTTPS; SSH accepts
+keys only; Firebase sign-in works on the phone; the worker is logged in to Claude.
+A daily SQLite backup leaves the host, and a restore into an empty volume shows the
+same lessons and events. See [deployment](deployment.md).
 
-Add Firebase email/password sign-in for the account the owner manually creates in the Firebase console, verified bearer tokens, an explicit allowed UID, and profile settings for time zone, enabled categories, and streak visibility. Disable end-user sign-up in Firebase settings. The app provides sign-in/sign-out only; password resets and account maintenance stay in Firebase administration. Use a fake identity verifier for automated tests; a local Firebase emulator profile is optional if it helps development.
+## Test strategy
 
-Acceptance: missing/invalid tokens, an unset owner UID, and a valid non-owner identity cannot access data or generation. The provisioned owner can sign in/out, keep a session across reloads, and persist preferences; the time zone is validated. Verify end-user registration is rejected by Firebase during setup. Test auth policy with fakes and manually verify sign-in on mobile before M3. Test configuration cannot silently authorize users in deployment.
-
-### A03 Implement habit rules and storage
-
-Labels: `feature`. Milestone: M1. Dependencies: A01, A02.
-
-Implement domain models, repository protocols, Redis storage, and habit endpoints. Include schedule versions, dated completion, archive/restore, month queries, and authoritative statistics as specified in [Product and experience](product.md).
-
-Acceptance: repeated Complete/Undo requests are idempotent; future or unscheduled completion is rejected; corrections update statistics; schedule changes preserve earlier due dates; archive/restore preserves history. Focused unit tests cover these rules and a small Redis integration check exercises the repository.
-
-### A04 Build the habit experience
-
-Labels: `feature`. Milestone: M1. Dependencies: A03.
-
-Build Today, habit creation/editing, the month calendar, weekly consistency, completion milestones, and optional streak display. Use shared date/status components and optimistic updates with rollback.
-
-Acceptance: a user can complete or undo directly from Today and correct a past calendar day; filled circles match persisted data after reload; a failed request restores the correct UI state. Verify a 360-pixel viewport, usable controls, and keyboard interaction. Preserve semantic HTML and existing reduced-motion support; dedicated screen-reader polish is deferred. Archive and past corrections remain discoverable.
-
-### A05 Implement discovery storage and the worker with fixtures
-
-Labels: `feature`. Milestone: M2. Dependencies: A01, A02.
-
-Create typed category payloads, daily slots, history indexes, source identities, annotations, and worker orchestration using deterministic fake sources and generation. One worker scans today's five slots and processes work sequentially. Implement scheduling, current-day ensure, persistent attempt/call limits, restart recovery, and atomic publication.
-
-Acceptance: one ready item per date/category; refreshing and re-requesting do not duplicate it; a restart recovers interrupted work without resetting attempts or call counts; an unavailable category leaves others and habits usable. History is retained automatically, including unread items. Source/LLM calls never run inside the API request handler. Document that only one worker may run at a time.
-
-### A06 Connect sources and one LLM provider
-
-Labels: `feature`. Milestone: M2. Dependencies: A05.
-
-Implement the category sources in [Daily discoveries](discoveries.md), seed/fallback records, structured generation, source validation, repeat suppression, and basic usage logging. Select one provider/model and call/token caps that fit the owner's budget; record these choices in configuration and the runbook.
-
-Acceptance: all five categories produce source-backed cards; exact titles/IDs/links come from fetched records; source failure and malformed model output fail gracefully; retry cannot bypass limits. Check current source endpoints, attribution requirements, and provider terms during implementation. Manually inspect a few cards per category and keep sanitized parsing fixtures. Confirm how the candidate pool is replenished.
-
-### A07 Build discoveries and the Library
-
-Labels: `feature`. Milestone: M2. Dependencies: A04, A05; A06 for live-content acceptance.
-
-Build daily previews, category detail cards, artwork display, source links, automatic history, favorites, read state, filters, and basic search. Connect ensure/retry controls and bounded status polling.
-
-Acceptance: all five categories render on a phone; Library finds older words, artwork, events, mind cards, and papers; a favorite can be toggled without altering the saved card. Loading, partial failures, empty history, and failed images have clear states. Ready content cannot be rerolled accidentally.
-
-### A08 Add export and verify the full personal workflow
-
-Labels: `quality`. Milestone: M3. Dependencies: A03, A07.
-
-Implement a versioned JSON export and final targeted integration checks. Document how to inspect generation errors/usage, storage health, and backup status using logs and simple commands; an operations UI is unnecessary for the first release. Complete setup documentation and verify the app on a phone.
-
-Acceptance: export contains all durable domain records and provenance, and its schema is documented. Run the test strategy below, manually verify sign-in → habit → discovery → history → export, and check container recreation preserves data. No real provider credentials are needed in CI. Fix concrete usability and error-state issues found during this pass; dedicated screen-reader polish remains deferred.
-
-### A09 Deploy independently and enable GCP recovery
-
-Labels: `infra`. Milestone: M3. Dependencies: A08.
-
-Choose the host/domain and dedicated GCP project; configure HTTPS, deployment secrets, the Firebase production flow, scheduled backups, retention, and restore instructions. Keep all identities, resources, and configuration separate from Osmy.
-
-Acceptance: only nginx is publicly reachable; the owner can use the app from a phone over HTTPS; an automatic off-host backup succeeds; restore it into an empty isolated Redis volume and verify habits, schedules, completions, discoveries, and annotations. Record the restore result and enable backup-failure visibility before regular use.
-
-## Testing strategy
-
-Use small tests that exercise observable behavior. Test domain rules with a fixed clock and plain fixtures; test application services with small in-memory protocol implementations. Avoid elaborate mock graphs, exact LLM prose snapshots, a numerical coverage target, or a large browser suite.
-
-| Layer | Useful checks |
+| Layer | What it covers |
 | --- | --- |
-| Habit unit tests | Selected weekdays, past corrections, future rejection, tomorrow-effective edits, archive/restore, incomplete today, zero-opportunity windows, representative timezone/DST boundary |
-| Content unit tests | Repeat identity normalization, supplied-source-only output, category validation, call limits, attempts including manual retries, stable published slots |
-| Auth/API unit tests | Owner allowlist, rejected identity, ownership lookup, request validation and error mapping |
-| Frontend component tests | Completion/undo and rollback, calendar status labels, category payload rendering, favorite/filter interaction |
-| Redis integration tests | Repository round trip/idempotent completion; atomic publication/history with a shared-date page boundary; interrupted-slot recovery |
-| Thin HTTP integration check | Authenticate with a controlled test identity, create a habit, complete it, retrieve calendar/history through the real API and Redis |
+| Domain unit tests | Subject weighting with a seeded random generator, streaks and statistics with fixed dates and time zones, lesson content validation |
+| Application unit tests | Job creation limits, worker job processing with a fake generator and fixed clock, retries and recovery, publication, event recording |
+| Adapter unit tests | SQLite repositories against a temporary file; token verification with test keys; CLI result classification from recorded JSON samples; Wikipedia response parsing |
+| API tests | Auth policy, validation and error mapping, a full request → worker step → read flow with fakes |
+| Frontend tests | Today states, reader actions, Library filters, settings form, with a fake API |
+| Smoke check | Real Compose stack with the fake generator: routing, private ports, persistence across recreation, a lesson prepared end to end |
 
-Run integration checks in a Compose test profile against a separate disposable Redis volume and project name. The API check uses dependency overrides or the Firebase emulator, fake content sources, and a fake LLM; it does not contact paid providers. Keep fixtures isolated and teardown explicit so tests cannot operate on personal data.
+No unit test touches the network, Docker, Firebase, or Claude. CI runs `scripts/check`
+and `scripts/smoke.py`; neither needs credentials.
 
-CI should run formatting/lint checks, Python and TypeScript typechecks, unit/component tests, frontend build, and this small integration set. Keep external source smoke checks opt-in and manual because network/provider availability should not destabilize ordinary CI. Manually test the provisioned account's mobile sign-in and a real generated sample before deployment.
+## Decisions left for setup
 
-Container recreation, an initial migration dry run, and the restore drill are release checks, not a large continuous failure-injection suite. Add regression tests when real bugs justify them.
-
-## Deployment and operations
-
-A small single Linux host running Docker Compose is the initial deployment shape. The hosting provider and machine size remain setup choices. Firebase handles identity; no Firebase database or managed application platform is required. GCP is the backup destination and may also host the VM if convenient.
-
-Use pinned image versions, restart policies, healthchecks, TLS renewal, and bounded log retention. Simple logs and documented commands should expose API/worker errors, last successful generation, Redis persistence status, disk/memory usage, and backup age. A dashboard or observability stack is unnecessary initially. Run one worker; stop the old process before starting its replacement.
-
-Store secrets outside Git and mount them or inject them at runtime. On GCP prefer an attached identity; elsewhere use an explicit app-specific credential mechanism. Do not silently borrow the developer machine's active GCP project. Example environment files contain placeholders only.
-
-Before a schema-changing deployment, take a recoverable snapshot, run the versioned migration, then start the new application. If rollback would require an older schema, restore the pre-migration snapshot into a separate volume and accept the documented loss of writes since that snapshot; do not blindly start old code on new records.
-
-## Deferred GCP backups
-
-Development can proceed with local persistent Redis only. Before regular use, add a backup Compose service or scheduled container command that produces and uploads a completed RDB snapshot to a private bucket in the dedicated project. Keeping an AOF or a volume on the same host is not an off-host backup.
-
-Take one off-host snapshot each day and keep 30 days of snapshots. A current daily backup means roughly one day's work could be lost after complete host loss; a failed backup can increase that gap. The local AOF reduces ordinary restart loss but does not improve the age of an off-host snapshot. Verify the actual recovery procedure with an initial restore drill.
-
-The backup process should:
-
-1. Trigger or await a fresh Redis RDB snapshot and confirm successful completion through persistence status.
-2. Copy the completed snapshot to staging and record the timestamp and Redis/application schema versions in a small companion file.
-3. Upload under a unique timestamped object name; use checksum verification before reporting success.
-4. Apply one 30-day lifecycle rule to the snapshot prefix and companion files, and clean up local staging files after successful upload.
-5. Log failures and the last successful backup time so a simple status check shows whether backups are current.
-
-Use a private bucket and an app-specific backup identity with only the bucket permissions needed to upload and verify objects. The owner can restore through their existing administrative access; a separate operator account is unnecessary. Configure the retention rule on the backup prefix. See [Cloud Storage IAM roles](https://cloud.google.com/storage/docs/access-control/iam-roles) and [object lifecycle management](https://cloud.google.com/storage/docs/lifecycle).
-
-Restore into an empty volume using the compatible pinned Redis version and documented RDB import procedure. Ensure an old AOF cannot override the restored snapshot; validate the loaded records before enabling normal persistence and application writes. Run the app against the isolated restored store, check representative records and counts, then document cutover. Do not overwrite the live volume during a drill.
-
-Backups include saved text, provenance, and image URLs, not permanent copies of remote artwork or papers. Preserve deployment configuration and a secure way to re-provision secrets separately; never put credentials in a user-data export or ordinary backup manifest.
-
-## Decisions intentionally left for setup
-
-| Decision | Default direction | Needed by |
+| Decision | Default | Needed by |
 | --- | --- | --- |
-| Final app name | Ataraxia as the working name | Visual polish or deployment |
-| LLM provider/model and currency budget | One low-cost structured-output model, bounded calls/tokens | A06 live integration |
-| Owner UID, time zone, Firebase project | Dedicated project, manually created email/password account, end-user sign-up disabled; time zone confirmed in app | A02 live sign-in |
-| Host, domain, TLS provisioning | One Compose host | A09 |
-| Backup project, bucket, identity | Dedicated GCP resources independent of Osmy | A09, before regular use |
-| More intensive game mechanics | Supportive milestones first | Review after actual use |
-
-## Follow-up ideas
-
-The first candidates for later issues are flexible weekly targets, an optional weekly reflection, and active recall of saved words or concepts. A garden/constellation that grows with cumulative completions could make progress tangible without penalizing missed days. A small calendar heatmap can complement the required completion circles after enough history exists. Treat these as experiments driven by personal usefulness, not prerequisites for the initial release.
+| Firebase project and owner account | Dedicated project, email/password only, sign-up disabled | Phone use (L06); local mode works without it |
+| VM provider and size | Any small Linux VM with 1–2 GB RAM | L06 |
+| Private network | Tailscale with HTTPS | L06 |
+| Backup destination | A private bucket or a second machine reachable over Tailscale | L06, before regular use |
+| Claude model | `opus` | Can change any time in `.env` |

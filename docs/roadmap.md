@@ -1,48 +1,34 @@
 # Ataraxia roadmap
 
-The goal is a private, mobile-first habit tracker with a daily learning ritual and
-durable history. Acceptance lives in [delivery](delivery.md); product rules live
-in [product](product.md). This file tracks outcomes without copying those specs.
+The goal is a private, mobile-first learning app: one Claude-written lesson a day,
+with follow-ups, a Library, and a complete activity record. Product rules live in
+[product](product.md); acceptance lives in [delivery](delivery.md). This file tracks
+outcomes.
 
-Status verified on 2 November 2026: A01 is merged; A02–A09 have no implementation.
-Native GitHub stack **#13** contains [#11](https://github.com/djvaroli/ataraxia/pull/11), the handoff
-filename fix, followed by [#12](https://github.com/djvaroli/ataraxia/pull/12), the
-agent workflow setup. Membership and order are verified through GitHub's API.
-Both await the owner's stack review and merge; neither is part of `main` yet.
+On 24 November 2026 the owner moved lessons ahead of habits. A01 (runnable shell) and
+the agent workflow (#11, #12) are merged. Habit items A02–A09 are superseded by the
+L-series below; the habit design remains in Git history for later.
 
 | Item | Outcome | Depends on | State |
 | --- | --- | --- | --- |
-| A01 | Start the app shell, API, worker, and durable Redis locally | — | Done: [#9](https://github.com/djvaroli/ataraxia/pull/9) |
-| Workflow setup | Shared skills, repo standards, and a review/fix delivery loop | A01 | In review: [#12](https://github.com/djvaroli/ataraxia/pull/12) |
-| A02 | Owner signs in and saves preferences | A01 | Next; implementation not started |
-| A03 | Habit rules and storage preserve completion/schedule history | A02 | Planned |
-| A04 | Track habits from Today and a mobile calendar | A03 | Planned |
-| A05 | Stable daily discoveries and restart-safe worker using fixtures | A02 | Planned |
-| A06 | Source-backed content from one bounded LLM provider | A05 | Planned; provider/budget decision needed |
-| A07 | Read discoveries and revisit them in the Library | A04, A05; A06 for live acceptance | Planned |
-| A08 | Export durable history and verify the whole personal workflow | A03, A07 | Planned |
-| A09 | Use the app over HTTPS with tested off-host backup/restore | A08 | Planned; dedicated cloud/host setup needed |
+| A01 | App shell, API, worker, and storage run locally in Docker | — | Done: [#9](https://github.com/djvaroli/ataraxia/pull/9) |
+| Workflow | Repo standards and the review/fix delivery loop | A01 | Done: [#11](https://github.com/djvaroli/ataraxia/pull/11), [#12](https://github.com/djvaroli/ataraxia/pull/12) |
+| L01 | Lessons-first product, architecture, and deployment plan | — | In progress |
+| L02 | SQLite storage replaces Redis; migrations; health and smoke checks updated | L01 | Planned |
+| L03 | Owner sign-in (Firebase and local modes), settings, lessons API, activity record, progress, export | L02 | Planned |
+| L04 | Worker prepares lessons through the Claude CLI, with schedule, limits, recovery, and Wikipedia images | L03 | Planned |
+| L05 | Reading-room frontend: Today, reader, follow-ups, Library, Progress, Settings, sign-in | L03 (contract) | Planned |
+| L06 | Private phone access on a VM over Tailscale, Claude login, daily off-host backup with a tested restore | L04, L05 | Planned; needs the owner's VM and Firebase project |
 
-## Next implementation increment
+Later, after a few weeks of use: quizzes and spaced review, recaps from the activity
+record, habit tracking, retrieval-backed lessons. See [product](product.md#later).
 
-A02 should deliver verified owner identity, sign-in/sign-out, persistent preferences,
-and time-zone validation. Implement with a fake verifier in cheap unit tests; live
-Firebase setup is separate. Missing configuration must fail closed. Keep the public
-health routes working. Do not add habits or content generation to this increment.
+## Working agreement
 
-An implementation session chooses the smallest coherent PR split and runs the
-[delivery loop](agent-workflow.md). Routine splits and review fixes are agent-owned;
-the user reviews the resulting stack. An open PR is in review, not done. Record
-the merged PR and acceptance evidence before advancing an item to done.
+The owner has authorized agents to commit, open PRs, and merge reviewed PRs whose
+checks pass. Deploying, provisioning cloud resources, and paid provider use still need
+the owner. The owner reviews by using the running app and giving feedback.
 
-## Order and boundaries
-
-Habits come first. A05 can follow A04 in one sequential workstream; splitting it
-out only helps once contracts and file ownership are clear. Keep one active stack
-initially so review and merging remain easy.
-
-Backups are unnecessary during fixture-based development and required before
-trusting the app with personal history. Provider choice/spending, dedicated
-Firebase/GCP resources, and host/domain remain owner decisions. Dedicated
-screen-reader work and production-scale infrastructure are deferred; core security,
-data integrity, and readable modular code are part of every increment.
+L05 can be built in parallel with L03/L04 once the API contract (OpenAPI schema and
+generated types) is merged. An open PR is in review, not done; record the merged PR
+before marking an item done.

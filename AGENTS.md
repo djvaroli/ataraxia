@@ -8,7 +8,7 @@ for the current task. Verify Git/PR state before trusting a handoff.
 ## Code
 
 - Use composition and small modules with explicit responsibilities. Keep domain
-  rules separate from HTTP, Redis, Firebase, and LLM adapters.
+  rules separate from HTTP, SQLite, Firebase, and Claude CLI adapters.
 - Inject side-effecting dependencies at the composition root. Define narrow Python
   protocols/TypeScript interfaces where behavior crosses a boundary; implement them
   with real adapters and simple fakes. Avoid service locators and global mutable state.
@@ -25,7 +25,7 @@ for the current task. Verify Git/PR state before trusting a handoff.
 
 ## Tests and documentation
 
-- Unit tests are fast and deterministic: no network, Docker, real Redis/Firebase,
+- Unit tests are fast and deterministic: no network, Docker, real Firebase/Claude,
   provider calls, or wall-clock sleeps. Use fakes at I/O boundaries and test observable
   rules, failure paths, and important invariants. Keep a few separate integration checks.
 - Use `bash scripts/check` for formatting, lint, strict types, unit tests, build,
@@ -40,8 +40,8 @@ for the current task. Verify Git/PR state before trusting a handoff.
 
 - Prefer native GitHub stacks when related changes have dependencies or a larger increment
   benefits from smaller reviews. Keep each PR coherent and runnable; use a single
-  PR for a small self-contained change. Use `codex/` branches and isolated worktrees
-  when work overlaps.
+  PR for a small self-contained change. Use `claude/` branches (older work used
+  `codex/`) and isolated worktrees when work overlaps.
 - Base the first PR on the integration branch and each dependent PR on its parent
   branch. Register the PRs as a native GitHub stack and verify its number, membership,
   and order through GitHub; a branch chain alone is insufficient. Record that number
@@ -60,8 +60,9 @@ for the current task. Verify Git/PR state before trusting a handoff.
   flows. Dedicated screen-reader audits/polish, compliance work, broad compatibility,
   and production-scale infrastructure are outside automatic remediation. Preserve
   simple semantic controls and keyboard usability without expanding the task.
-- Stop at the finished PR stack for the user's review, merge, and application trial.
-  Do not merge, deploy, spend on providers, or provision cloud resources without the
+- The owner has authorized agents to merge reviewed PRs whose checks pass; they
+  review by using the app. Stacked PRs merge through the `merge-async` API. Do not
+  deploy, spend on paid providers, or provision cloud resources without the
   corresponding authorization. Keep Ataraxia resources separate from other projects.
 - Use `ataraxia-handoff` / `ataraxia-resume` for this repo's `.HANDOFF.md` and
   `.handoff/` format. The global workstream skills remain available for other projects.
