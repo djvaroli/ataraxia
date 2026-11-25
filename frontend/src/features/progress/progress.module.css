@@ -101,7 +101,7 @@
 
 .bar {
   position: relative;
-  height: 3px;
+  height: 4px;
   background: var(--rule);
 }
 
@@ -113,8 +113,9 @@
   bottom: 0;
 }
 
+/* Prepared but unfinished: a faint tint, so finished lessons read as the solid part. */
 .barAll {
-  background: color-mix(in srgb, var(--pigment) 35%, transparent);
+  background: color-mix(in srgb, var(--pigment) 22%, transparent);
 }
 
 .barFinished {
