@@ -39,6 +39,8 @@ export function useLessonState(lessonId: string) {
     );
 
   return useMutation({
+    // One change at a time, so responses and rollbacks cannot arrive out of order.
+    scope: { id: `lesson-state-${lessonId}` },
     mutationFn: (change: Change): Promise<LessonState> => {
       switch (change.kind) {
         case 'saved':
@@ -64,6 +66,7 @@ export function useLessonState(lessonId: string) {
       setState(state);
     },
     onSettled: () => {
+      void client.invalidateQueries({ queryKey: key });
       void client.invalidateQueries({ queryKey: keys.today });
       void client.invalidateQueries({ queryKey: keys.lessonsAll });
       void client.invalidateQueries({ queryKey: keys.progress });

@@ -132,7 +132,13 @@ export function createApiClient(fetchFn: FetchLike, getToken: TokenSource) {
     options: RequestOptions = {},
   ): Promise<Response> {
     const headers: Record<string, string> = { Accept: 'application/json' };
-    const token = await getToken();
+    let token: string | null;
+    try {
+      token = await getToken();
+    } catch {
+      // Refreshing an expired ID token needs the network too.
+      throw new ApiError(0, null, 'Ataraxia could not be reached.');
+    }
     if (token) headers.Authorization = `Bearer ${token}`;
     if (options.body !== undefined) {
       headers['Content-Type'] = 'application/json';

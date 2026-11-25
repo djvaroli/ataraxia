@@ -109,8 +109,8 @@ function AuthGate({ auth, deps }: { auth: AuthClient; deps: AppDependencies }) {
       <Forbidden
         mode={auth.mode}
         onSignOut={() => {
-          setForbidden(false);
-          void auth.signOut();
+          // Sign out first, so the app does not remount with the old account.
+          void auth.signOut().then(() => setForbidden(false));
         }}
       />
     );

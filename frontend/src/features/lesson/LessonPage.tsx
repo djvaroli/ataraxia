@@ -1,5 +1,12 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  type RefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router';
 import { keys } from '../../app/queries';
 import { useApi } from '../../app/services';
@@ -16,6 +23,8 @@ import { LessonEnd } from './LessonEnd';
 import styles from './lesson.module.css';
 import { useReadingReports, useScrollProgress } from './useReading';
 import { useLessonState } from './useLessonState';
+
+const NO_REF: RefObject<HTMLDivElement | null> = { current: null };
 
 export function LessonPage() {
   const { lessonId = '' } = useParams();
@@ -72,13 +81,15 @@ function useBack() {
 function TopBar({
   lesson,
   onFlag,
-  progress = 0,
+  bodyRef,
 }: {
   lesson?: Lesson;
   onFlag?: () => void;
-  progress?: number;
+  /** The lesson text, whose read fraction drives the progress line. */
+  bodyRef?: RefObject<HTMLDivElement | null>;
 }) {
   const back = useBack();
+  const progress = useScrollProgress(bodyRef ?? NO_REF);
   const change = useLessonState(lesson?.id ?? '');
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -179,7 +190,6 @@ function LessonView({ lesson }: { lesson: Lesson }) {
   const api = useApi();
   const client = useQueryClient();
   const bodyRef = useRef<HTMLDivElement>(null);
-  const progress = useScrollProgress(bodyRef);
   const [flagOpen, setFlagOpen] = useState(false);
   const opened = useRef(false);
 
@@ -205,7 +215,11 @@ function LessonView({ lesson }: { lesson: Lesson }) {
   );
   useReadingReports(lesson.id, bodyRef, send);
 
-  const [first, ...rest] = lesson.illustrations;
+  const first = lesson.illustrations.at(0);
+  const rest = useMemo(
+    () => lesson.illustrations.slice(1),
+    [lesson.illustrations],
+  );
   const total = lesson.thread.length;
 
   return (
@@ -213,7 +227,7 @@ function LessonView({ lesson }: { lesson: Lesson }) {
       <TopBar
         lesson={lesson}
         onFlag={() => setFlagOpen(true)}
-        progress={progress}
+        bodyRef={bodyRef}
       />
       <article className={styles.article}>
         <header className={styles.header}>

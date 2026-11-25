@@ -63,6 +63,8 @@ function SettingsForm({ me }: { me: Me }) {
   const client = useQueryClient();
   const [saved, setSaved] = useState(false);
   const save = useMutation({
+    // One change at a time, so an older response cannot overwrite a newer one.
+    scope: { id: 'preferences' },
     mutationFn: (update: PreferencesUpdate) => api.updateMe(update),
     onMutate: () => setSaved(false),
     onSuccess: (updated) => {

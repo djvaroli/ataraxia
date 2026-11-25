@@ -5,6 +5,7 @@ import { LibraryPage } from '../features/library/LibraryPage';
 import { ProgressPage } from '../features/progress/ProgressPage';
 import { SettingsPage } from '../features/settings/SettingsPage';
 import { TodayPage } from '../features/today/TodayPage';
+import { ErrorBoundary } from './ErrorBoundary';
 import { NotFound } from './NotFound';
 import { keys, useMe } from './queries';
 import { useApi } from './services';
@@ -21,23 +22,25 @@ export function AppRoutes() {
   useAppOpened();
   useConfirmTimeZone();
   return (
-    <Routes>
-      <Route element={<Shell />}>
-        <Route index element={<TodayPage />} />
-        <Route path="library" element={<LibraryPage />} />
-        <Route path="progress" element={<ProgressPage />} />
-        <Route path="settings" element={<SettingsPage />} />
-        <Route path="*" element={<NotFound />} />
-      </Route>
-      <Route
-        path="lessons/:lessonId"
-        element={
-          <Suspense fallback={null}>
-            <LessonPage />
-          </Suspense>
-        }
-      />
-    </Routes>
+    <ErrorBoundary>
+      <Routes>
+        <Route element={<Shell />}>
+          <Route index element={<TodayPage />} />
+          <Route path="library" element={<LibraryPage />} />
+          <Route path="progress" element={<ProgressPage />} />
+          <Route path="settings" element={<SettingsPage />} />
+          <Route path="*" element={<NotFound />} />
+        </Route>
+        <Route
+          path="lessons/:lessonId"
+          element={
+            <Suspense fallback={null}>
+              <LessonPage />
+            </Suspense>
+          }
+        />
+      </Routes>
+    </ErrorBoundary>
   );
 }
 

@@ -66,7 +66,6 @@ function FollowUpForm({
     onSuccess: (job) => {
       client.setQueryData(keys.job(job.id), job);
       void client.invalidateQueries({ queryKey: keys.today });
-      onRequested(job);
     },
   });
 
@@ -80,7 +79,10 @@ function FollowUpForm({
 
   function submit(event: FormEvent) {
     event.preventDefault();
-    if (valid && !blocked) request.mutate();
+    // Passed here rather than to useMutation so it does not run if the sheet
+    // was closed while the request was in flight.
+    if (valid && !blocked)
+      request.mutate(undefined, { onSuccess: onRequested });
   }
 
   return (

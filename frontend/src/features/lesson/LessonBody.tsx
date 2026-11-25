@@ -4,7 +4,7 @@
  * `trust: false`, so commands such as \href cannot create links either.
  */
 import 'katex/dist/katex.min.css';
-import { Fragment, type ReactNode } from 'react';
+import { Fragment, memo, type ReactNode } from 'react';
 import Markdown, { type Components } from 'react-markdown';
 import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
@@ -57,7 +57,11 @@ interface LessonBodyProps {
   illustrations: Illustration[];
 }
 
-export function LessonBody({ markdown, illustrations }: LessonBodyProps) {
+/** Memoized: parsing Markdown and typesetting math is the reader's costliest work. */
+export const LessonBody = memo(function LessonBody({
+  markdown,
+  illustrations,
+}: LessonBodyProps) {
   const sections = splitSections(markdown);
   const after = placements(sections.length, illustrations.length);
   return (
@@ -79,4 +83,4 @@ export function LessonBody({ markdown, illustrations }: LessonBodyProps) {
       })}
     </div>
   );
-}
+});
