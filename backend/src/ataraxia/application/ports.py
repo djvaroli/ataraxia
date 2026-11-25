@@ -124,3 +124,17 @@ class IllustrationResolver(Protocol):
         Never raises; bounded to a few seconds in total.
         """
         ...
+
+
+@dataclass(frozen=True)
+class LoginStatus:
+    """Whether the generator's account is signed in, and until when if known."""
+
+    logged_in: bool
+    expires_at: datetime | None = None
+
+
+class LoginProbe(Protocol):
+    def status(self) -> LoginStatus | None:
+        """Check the login without generating anything; None when it cannot tell."""
+        ...

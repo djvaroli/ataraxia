@@ -12,6 +12,7 @@ import pytest
 from ataraxia.adapters.claude_cli import (
     ClaudeCliConfig,
     ClaudeCliGenerator,
+    ClaudeCliLogin,
     CliResult,
     SubprocessCliRunner,
     build_prompt,
@@ -243,3 +244,22 @@ def test_runner_reports_a_missing_executable(tmp_path: Path) -> None:
     with pytest.raises(GenerationError) as raised:
         parse_result(result, ART)
     assert raised.value.code == "claude_error"
+
+
+def test_login_probe_reads_auth_status() -> None:
+    signed_out = RecordingRunner(
+        ok(json.dumps({"loggedIn": False, "authMethod": "none", "loginExpiresAt": None}))
+    )
+    status = ClaudeCliLogin(CONFIG, signed_out).status()
+    assert status is not None and not status.logged_in
+    assert signed_out.calls[0][0] == ["/usr/local/bin/claude", "auth", "status"]
+
+    signed_in = RecordingRunner(
+        CliResult(0, '{"loggedIn": true, "loginExpiresAt": "2026-12-22T20:14:18Z"}', "", False, 1)
+    )
+    status = ClaudeCliLogin(CONFIG, signed_in).status()
+    assert status is not None and status.logged_in
+    assert status.expires_at == datetime(2026, 12, 22, 20, 14, 18, tzinfo=UTC)
+
+    assert ClaudeCliLogin(CONFIG, RecordingRunner(CliResult(1, "", "", True, 1))).status() is None
+    assert ClaudeCliLogin(CONFIG, RecordingRunner(ok("garbage"))).status() is None

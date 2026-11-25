@@ -27,6 +27,7 @@ from ataraxia.application.ports import (
     GenerationError,
     GenerationUsage,
     LessonBrief,
+    LoginStatus,
 )
 from ataraxia.domain.jobs import JobErrorCode
 from ataraxia.domain.lessons import WORD_TARGETS, LessonContent
@@ -128,6 +129,33 @@ class ClaudeCliGenerator:
             self._config.timeout_seconds,
         )
         return parse_result(result, brief)
+
+
+class ClaudeCliLogin:
+    """`LoginProbe` backed by `claude auth status`, which makes no model request."""
+
+    def __init__(self, config: ClaudeCliConfig, runner: CliRunner) -> None:
+        self._config = config
+        self._runner = runner
+
+    def status(self) -> LoginStatus | None:
+        result = self._runner.run(
+            [self._config.executable, "auth", "status"], "", environment(self._config), 30
+        )
+        if result.timed_out:
+            return None
+        try:
+            payload = _AuthStatus.model_validate_json(result.stdout)
+        except ValidationError:
+            return None
+        return LoginStatus(logged_in=payload.loggedIn, expires_at=payload.loginExpiresAt)
+
+
+class _AuthStatus(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    loggedIn: bool  # the CLI's own camelCase names
+    loginExpiresAt: datetime | None = None
 
 
 def command(config: ClaudeCliConfig, brief: LessonBrief) -> list[str]:
