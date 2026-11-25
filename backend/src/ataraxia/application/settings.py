@@ -61,6 +61,10 @@ class PreferencesService:
     def get(self) -> Preferences:
         return self._profile.get() or self._defaults
 
+    def updated_at(self) -> datetime | None:
+        """When the owner last changed settings; None while the defaults apply."""
+        return self._profile.updated_at()
+
     def owner_time(self) -> OwnerTime:
         return OwnerTime(now=self._clock.now(), preferences=self.get())
 
@@ -76,7 +80,6 @@ class PreferencesService:
         """Apply the given fields. Setting the time zone confirms it, even when it is
         unchanged. Writes `settings.updated` with the changed fields' new values, and
         nothing when nothing changed. Raises `InvalidInputError`."""
-        current = self.get()
         changes: dict[str, object] = {}
         if time_zone is not None:
             changes["time_zone"] = check_time_zone(time_zone)
@@ -89,14 +92,18 @@ class PreferencesService:
             changes["morning_lesson"] = morning_lesson
         if morning_hour is not None:
             changes["morning_hour"] = morning_hour
-        updated = Preferences.model_validate({**current.model_dump(), **changes})
-        before = current.model_dump(mode="json")
-        after = updated.model_dump(mode="json")
-        changed: dict[str, JsonValue] = {
-            name: value for name, value in after.items() if before[name] != value
-        }
-        if not changed:
-            return current
-        moment = OwnerTime(now=self._clock.now(), preferences=updated)
-        self._profile.save(updated, moment.event("settings.updated", data=changed))
-        return updated
+        now = self._clock.now()
+
+        def apply(current: Preferences) -> tuple[Preferences, NewEvent] | None:
+            updated = Preferences.model_validate({**current.model_dump(), **changes})
+            before = current.model_dump(mode="json")
+            after = updated.model_dump(mode="json")
+            changed: dict[str, JsonValue] = {
+                name: value for name, value in after.items() if before[name] != value
+            }
+            if not changed:
+                return None
+            moment = OwnerTime(now=now, preferences=updated)
+            return updated, moment.event("settings.updated", data=changed)
+
+        return self._profile.update(self._defaults, apply)

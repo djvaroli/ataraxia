@@ -15,6 +15,7 @@ from ataraxia.adapters.sqlite.database import Database
 from ataraxia.application.errors import ConflictError
 from ataraxia.application.models import ParentRecord, SubjectTotals
 from ataraxia.application.views import (
+    ExportedLesson,
     Lesson,
     LessonState,
     LessonSummary,
@@ -64,19 +65,21 @@ class LessonRepository:
             ).fetchall()
         return _lesson(row, [_thread_entry(entry) for entry in thread])
 
-    def all_lessons(self) -> list[Lesson]:
-        """Every lesson with its thread, oldest first, for export."""
+    def all_lessons(self) -> list[ExportedLesson]:
+        """Every lesson with its thread and every stored field, oldest first."""
         with self._database.connect() as connection:
             found = connection.execute(
                 f"""
-                SELECT {rows.LESSON_COLUMNS} FROM {rows.LESSONS_WITH_STATE}
+                SELECT {rows.LESSON_COLUMNS}, l.model, l.prompt_version, s.rated_at,
+                    s.finished_on, s.flag_note
+                FROM {rows.LESSONS_WITH_STATE}
                 ORDER BY l.created_at, l.part, l.id
                 """
             ).fetchall()
         threads: dict[str, list[ThreadEntry]] = {}
         for row in found:
             threads.setdefault(row["thread_root_id"], []).append(_thread_entry(row))
-        return [_lesson(row, threads[row["thread_root_id"]]) for row in found]
+        return [_exported(row, threads[row["thread_root_id"]]) for row in found]
 
     def page(
         self,
@@ -450,6 +453,18 @@ def _lesson(row: sqlite3.Row, thread: list[ThreadEntry]) -> Lesson:
         further=_FURTHER.validate_json(row["further"]),
         illustrations=rows.illustrations(row["illustrations"]),
         thread=thread,
+    )
+
+
+def _exported(row: sqlite3.Row, thread: list[ThreadEntry]) -> ExportedLesson:
+    return ExportedLesson(
+        **dict(_lesson(row, thread)),
+        model=row["model"],
+        prompt_version=row["prompt_version"],
+        rated_at=rows.parse_optional_timestamp(row["rated_at"]),
+        finished_on=None if row["finished_on"] is None else date.fromisoformat(row["finished_on"]),
+        flagged_at=rows.parse_optional_timestamp(row["flagged_at"]),
+        flag_note=row["flag_note"],
     )
 
 

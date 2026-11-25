@@ -367,20 +367,33 @@
           },
           "jobs": {
             "items": {
-              "$ref": "#/components/schemas/Job"
+              "$ref": "#/components/schemas/ExportedJob"
             },
             "title": "Jobs",
             "type": "array"
           },
           "lessons": {
             "items": {
-              "$ref": "#/components/schemas/Lesson"
+              "$ref": "#/components/schemas/ExportedLesson"
             },
             "title": "Lessons",
             "type": "array"
           },
           "preferences": {
             "$ref": "#/components/schemas/Preferences"
+          },
+          "preferences_updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When the owner last changed settings; null while on defaults.",
+            "title": "Preferences Updated At"
           },
           "reading_sessions": {
             "items": {
@@ -398,6 +411,7 @@
           "schema_version",
           "exported_at",
           "preferences",
+          "preferences_updated_at",
           "lessons",
           "jobs",
           "calls",
@@ -405,6 +419,475 @@
           "reading_sessions"
         ],
         "title": "ExportDocument",
+        "type": "object"
+      },
+      "ExportedJob": {
+        "additionalProperties": false,
+        "description": "A job with every stored field.",
+        "properties": {
+          "attempts": {
+            "title": "Attempts",
+            "type": "integer"
+          },
+          "can_retry": {
+            "title": "Can Retry",
+            "type": "boolean"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "direction_index": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Chosen go-deeper direction, if any.",
+            "title": "Direction Index"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "enum": [
+                  "claude_auth",
+                  "claude_usage_limit",
+                  "claude_timeout",
+                  "invalid_output",
+                  "claude_error",
+                  "daily_limit",
+                  "interrupted"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "error_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Plain-language explanation of a failure.",
+            "title": "Error Message"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "daily",
+              "surprise",
+              "subject",
+              "topic",
+              "follow_up"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "lesson_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lesson Id"
+          },
+          "local_date": {
+            "format": "date",
+            "title": "Local Date",
+            "type": "string"
+          },
+          "next_attempt_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When a queued job will next be tried, e.g. after a usage limit.",
+            "title": "Next Attempt At"
+          },
+          "parent_lesson_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Lesson Id"
+          },
+          "queued_at": {
+            "description": "When the job was requested or last retried.",
+            "format": "date-time",
+            "title": "Queued At",
+            "type": "string"
+          },
+          "request_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Text"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "status": {
+            "enum": [
+              "queued",
+              "running",
+              "succeeded",
+              "failed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "subject": {
+            "anyOf": [
+              {
+                "enum": [
+                  "art",
+                  "history",
+                  "film",
+                  "words",
+                  "geography",
+                  "science",
+                  "math",
+                  "computing",
+                  "philosophy",
+                  "literature",
+                  "music"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "status",
+          "local_date",
+          "subject",
+          "request_text",
+          "parent_lesson_id",
+          "attempts",
+          "error_code",
+          "error_message",
+          "lesson_id",
+          "can_retry",
+          "next_attempt_at",
+          "created_at",
+          "started_at",
+          "finished_at",
+          "direction_index",
+          "queued_at"
+        ],
+        "title": "ExportedJob",
+        "type": "object"
+      },
+      "ExportedLesson": {
+        "additionalProperties": false,
+        "description": "A lesson with every stored field, including those the reader does not need.",
+        "properties": {
+          "body_markdown": {
+            "title": "Body Markdown",
+            "type": "string"
+          },
+          "cover": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Illustration"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "First illustration, if any."
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "finished_on": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Local date the lesson was finished.",
+            "title": "Finished On"
+          },
+          "flag_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Flag Note"
+          },
+          "flagged_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Flagged At"
+          },
+          "further": {
+            "items": {
+              "$ref": "#/components/schemas/FurtherItem"
+            },
+            "title": "Further",
+            "type": "array"
+          },
+          "glossary": {
+            "items": {
+              "$ref": "#/components/schemas/GlossaryEntry"
+            },
+            "title": "Glossary",
+            "type": "array"
+          },
+          "go_deeper": {
+            "items": {
+              "$ref": "#/components/schemas/Direction"
+            },
+            "title": "Go Deeper",
+            "type": "array"
+          },
+          "hook": {
+            "title": "Hook",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "illustrations": {
+            "items": {
+              "$ref": "#/components/schemas/Illustration"
+            },
+            "title": "Illustrations",
+            "type": "array"
+          },
+          "key_ideas": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Key Ideas",
+            "type": "array"
+          },
+          "local_date": {
+            "format": "date",
+            "title": "Local Date",
+            "type": "string"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "origin": {
+            "enum": [
+              "daily",
+              "surprise",
+              "subject",
+              "topic",
+              "follow_up"
+            ],
+            "title": "Origin",
+            "type": "string"
+          },
+          "parent_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Id"
+          },
+          "part": {
+            "title": "Part",
+            "type": "integer"
+          },
+          "prompt_version": {
+            "title": "Prompt Version",
+            "type": "string"
+          },
+          "rated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rated At"
+          },
+          "reading_minutes": {
+            "title": "Reading Minutes",
+            "type": "integer"
+          },
+          "request_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The owner's topic or question, if any.",
+            "title": "Request Text"
+          },
+          "state": {
+            "$ref": "#/components/schemas/LessonState"
+          },
+          "subject": {
+            "enum": [
+              "art",
+              "history",
+              "film",
+              "words",
+              "geography",
+              "science",
+              "math",
+              "computing",
+              "philosophy",
+              "literature",
+              "music"
+            ],
+            "title": "Subject",
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
+          },
+          "thread": {
+            "description": "Every lesson in this thread, oldest first, including this one.",
+            "items": {
+              "$ref": "#/components/schemas/ThreadEntry"
+            },
+            "title": "Thread",
+            "type": "array"
+          },
+          "thread_root_id": {
+            "title": "Thread Root Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "created_at",
+          "local_date",
+          "subject",
+          "origin",
+          "title",
+          "hook",
+          "reading_minutes",
+          "tags",
+          "cover",
+          "parent_id",
+          "thread_root_id",
+          "part",
+          "state",
+          "request_text",
+          "body_markdown",
+          "key_ideas",
+          "glossary",
+          "go_deeper",
+          "further",
+          "illustrations",
+          "thread",
+          "model",
+          "prompt_version",
+          "rated_at",
+          "finished_on",
+          "flagged_at",
+          "flag_note"
+        ],
+        "title": "ExportedLesson",
         "type": "object"
       },
       "FieldError": {

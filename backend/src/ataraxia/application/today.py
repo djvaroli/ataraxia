@@ -38,15 +38,16 @@ class TodayService:
 
     def today(self) -> Today:
         moment = self._preferences.owner_time()
-        jobs = self._jobs.jobs_on(moment.today)
+        daily = self.daily_slot(moment)
+        daily_id = daily.job.id if daily.job else None
         others = [
             job
-            for job in jobs
-            if job.kind != "daily" and job.status in ("queued", "running", "failed")
+            for job in self._jobs.jobs_for_today(moment.today)
+            if job.id != daily_id and job.status in ("queued", "running", "failed")
         ]
         return Today(
             local_date=moment.today,
-            daily=self.daily_slot(moment),
+            daily=daily,
             jobs=others,
             unfinished=self._lessons.unfinished(moment.now - UNFINISHED_WINDOW, UNFINISHED_LIMIT),
             allowance=self.allowance(moment),

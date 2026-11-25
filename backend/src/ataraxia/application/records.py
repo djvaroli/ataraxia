@@ -1,5 +1,6 @@
 """The activity record and the complete export, for later analysis."""
 
+import re
 from collections.abc import Callable
 
 from ataraxia.adapters.sqlite.activity import ActivityRepository
@@ -24,7 +25,7 @@ class ActivityService:
         """Events oldest first; the cursor is the last event ID of the previous page."""
         after = None
         if cursor is not None:
-            if not cursor.isdigit():
+            if not re.fullmatch(r"[0-9]{1,18}", cursor):
                 raise InvalidInputError("cursor", "This page cursor is not valid.")
             after = int(cursor)
         found = self._activity.page(after, limit + 1)
@@ -56,6 +57,7 @@ class ExportService:
             schema_version=self._schema_version(),
             exported_at=moment.now,
             preferences=moment.preferences,
+            preferences_updated_at=self._preferences.updated_at(),
             lessons=self._lessons.all_lessons(),
             jobs=self._jobs.all_jobs(),
             calls=self._jobs.all_calls(),

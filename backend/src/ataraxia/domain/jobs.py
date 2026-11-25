@@ -71,9 +71,10 @@ def after_failure(
     `queued_at` is when the job was requested or last retried.
     """
     if code == "claude_usage_limit":
-        if now - queued_at >= USAGE_LIMIT_GIVE_UP:
+        next_attempt = now + USAGE_LIMIT_DELAY
+        if next_attempt - queued_at > USAGE_LIMIT_GIVE_UP:
             return Fail()
-        return Requeue(now + USAGE_LIMIT_DELAY, refund=True)
+        return Requeue(next_attempt, refund=True)
     if code in FINAL_ERRORS or attempts >= MAX_ATTEMPTS:
         return Fail()
     return Requeue(now + RETRY_DELAY)

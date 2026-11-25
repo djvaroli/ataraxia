@@ -13,7 +13,7 @@ from ataraxia.adapters.sqlite.database import Database
 from ataraxia.application.errors import ConflictError, LimitReachedError, NotFoundError
 from ataraxia.application.models import DailyCap, NewJob, PendingJob, Publication, Usage
 from ataraxia.application.ports import GenerationUsage
-from ataraxia.application.views import GenerationCall, Job
+from ataraxia.application.views import ExportedJob, GenerationCall, Job
 from ataraxia.domain.activity import NewEvent
 from ataraxia.domain.jobs import (
     MAX_ATTEMPTS,
@@ -45,12 +45,14 @@ class JobRepository:
             row = _daily_row(connection, local_date.isoformat())
         return None if row is None else rows.job(row)
 
-    def jobs_on(self, local_date: date) -> list[Job]:
-        """Jobs requested on a local date, newest first."""
+    def jobs_for_today(self, local_date: date) -> list[Job]:
+        """Jobs requested on `local_date` plus any still queued or running from earlier
+        days (a usage-limit wait can cross midnight), newest first."""
         with self._database.connect() as connection:
             found = connection.execute(
                 """
-                SELECT * FROM generation_jobs WHERE local_date = ?
+                SELECT * FROM generation_jobs
+                WHERE local_date = ? OR status IN ('queued', 'running')
                 ORDER BY created_at DESC, id DESC
                 """,
                 (local_date.isoformat(),),
@@ -61,12 +63,19 @@ class JobRepository:
         with self._database.connect() as connection:
             return _usage(connection, local_date.isoformat())
 
-    def all_jobs(self) -> list[Job]:
+    def all_jobs(self) -> list[ExportedJob]:
         with self._database.connect() as connection:
             found = connection.execute(
                 "SELECT * FROM generation_jobs ORDER BY created_at, id"
             ).fetchall()
-        return [rows.job(row) for row in found]
+        return [
+            ExportedJob(
+                **dict(rows.job(row)),
+                direction_index=row["direction_index"],
+                queued_at=rows.parse_timestamp(row["queued_at"]),
+            )
+            for row in found
+        ]
 
     def all_calls(self) -> list[GenerationCall]:
         with self._database.connect() as connection:

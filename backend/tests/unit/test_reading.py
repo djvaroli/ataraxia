@@ -175,6 +175,14 @@ class TestToday:
         world.clock.advance(days=15)
         assert world.api.today.today().unfinished == []
 
+    def test_waiting_jobs_from_yesterday_stay_visible(self, world: World) -> None:
+        world.clock.advance(hours=8, minutes=50)  # 23:50 UTC.
+        waiting = world.api.requests.request_surprise()
+        world.clock.advance(minutes=20)
+        today = world.api.today.today()
+        assert today.local_date == date(2026, 11, 25)
+        assert [job.id for job in today.jobs] == [waiting.id]
+
 
 class TestSettings:
     def test_change_writes_one_event_with_new_values(self, world: World) -> None:
@@ -215,6 +223,14 @@ class TestExport:
         assert document.lessons[0].thread[0].id == lesson_id
         assert len(document.jobs) == 1 and len(document.calls) == 1
         assert [session.id for session in document.reading_sessions] == [SESSION_A]
+        world.api.reading.flag(lesson_id, "Check the date")
+        world.api.reading.set_finished(lesson_id, True)
+        lesson = world.api.export.export().lessons[0]
+        assert (lesson.model, lesson.prompt_version) == ("fake", "fake-1")
+        assert (lesson.flag_note, lesson.finished_on) == ("Check the date", date(2026, 11, 24))
+        assert lesson.flagged_at is not None
+        assert document.jobs[0].queued_at == world.clock.now()
+        assert document.preferences_updated_at == world.clock.now()
         assert [event.type for event in document.events] == [
             "lesson.requested",
             "lesson.prepared",

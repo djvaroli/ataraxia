@@ -169,6 +169,9 @@ def test_limits_and_conflicts(stack: Stack) -> None:
     assert client.post("/api/v1/activity", json={"type": "lesson.opened"}).status_code == 422
     bad_cursor = client.get("/api/v1/lessons", params={"cursor": "%%%"})
     assert bad_cursor.status_code == 422
+    for cursor in ("²", "9" * 30, "-1"):
+        response = client.get("/api/v1/activity", params={"cursor": cursor})
+        assert response.status_code == 422, cursor
 
 
 def test_unexpected_errors_return_error_body_without_details(

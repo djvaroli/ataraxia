@@ -98,7 +98,9 @@ class TestFailures:
         assert after_failure("claude_usage_limit", 2, NOW, later) == Requeue(
             later + USAGE_LIMIT_DELAY, refund=True
         )
-        assert after_failure("claude_usage_limit", 1, NOW, NOW + timedelta(hours=24)) == Fail()
+        # No attempt is scheduled past 24 hours after the request.
+        too_late = NOW + timedelta(hours=23, minutes=45)
+        assert after_failure("claude_usage_limit", 1, NOW, too_late) == Fail()
 
 
 class TestPreferences:

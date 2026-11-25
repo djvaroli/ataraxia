@@ -216,14 +216,35 @@ class ReadingSession(_Model):
     furthest_scroll: float
 
 
+class ExportedLesson(Lesson):
+    """A lesson with every stored field, including those the reader does not need."""
+
+    model: str | None
+    prompt_version: str
+    rated_at: datetime | None
+    finished_on: date | None = Field(description="Local date the lesson was finished.")
+    flagged_at: datetime | None
+    flag_note: str | None
+
+
+class ExportedJob(Job):
+    """A job with every stored field."""
+
+    direction_index: int | None = Field(description="Chosen go-deeper direction, if any.")
+    queued_at: datetime = Field(description="When the job was requested or last retried.")
+
+
 class ExportDocument(_Model):
     """Everything durable, for analysis and backup. `schema_version` is the database's."""
 
     schema_version: int
     exported_at: datetime
     preferences: Preferences
-    lessons: list[Lesson]
-    jobs: list[Job]
+    preferences_updated_at: datetime | None = Field(
+        description="When the owner last changed settings; null while on defaults."
+    )
+    lessons: list[ExportedLesson]
+    jobs: list[ExportedJob]
     calls: list[GenerationCall]
     events: list[ActivityEvent]
     reading_sessions: list[ReadingSession]

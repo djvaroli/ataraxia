@@ -513,14 +513,168 @@ export interface components {
              */
             exported_at: string;
             /** Jobs */
-            jobs: components["schemas"]["Job"][];
+            jobs: components["schemas"]["ExportedJob"][];
             /** Lessons */
-            lessons: components["schemas"]["Lesson"][];
+            lessons: components["schemas"]["ExportedLesson"][];
             preferences: components["schemas"]["Preferences"];
+            /**
+             * Preferences Updated At
+             * @description When the owner last changed settings; null while on defaults.
+             */
+            preferences_updated_at: string | null;
             /** Reading Sessions */
             reading_sessions: components["schemas"]["ReadingSession"][];
             /** Schema Version */
             schema_version: number;
+        };
+        /**
+         * ExportedJob
+         * @description A job with every stored field.
+         */
+        ExportedJob: {
+            /** Attempts */
+            attempts: number;
+            /** Can Retry */
+            can_retry: boolean;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Direction Index
+             * @description Chosen go-deeper direction, if any.
+             */
+            direction_index: number | null;
+            /** Error Code */
+            error_code: ("claude_auth" | "claude_usage_limit" | "claude_timeout" | "invalid_output" | "claude_error" | "daily_limit" | "interrupted") | null;
+            /**
+             * Error Message
+             * @description Plain-language explanation of a failure.
+             */
+            error_message: string | null;
+            /** Finished At */
+            finished_at: string | null;
+            /** Id */
+            id: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "daily" | "surprise" | "subject" | "topic" | "follow_up";
+            /** Lesson Id */
+            lesson_id: string | null;
+            /**
+             * Local Date
+             * Format: date
+             */
+            local_date: string;
+            /**
+             * Next Attempt At
+             * @description When a queued job will next be tried, e.g. after a usage limit.
+             */
+            next_attempt_at: string | null;
+            /** Parent Lesson Id */
+            parent_lesson_id: string | null;
+            /**
+             * Queued At
+             * Format: date-time
+             * @description When the job was requested or last retried.
+             */
+            queued_at: string;
+            /** Request Text */
+            request_text: string | null;
+            /** Started At */
+            started_at: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "queued" | "running" | "succeeded" | "failed";
+            /** Subject */
+            subject: ("art" | "history" | "film" | "words" | "geography" | "science" | "math" | "computing" | "philosophy" | "literature" | "music") | null;
+        };
+        /**
+         * ExportedLesson
+         * @description A lesson with every stored field, including those the reader does not need.
+         */
+        ExportedLesson: {
+            /** Body Markdown */
+            body_markdown: string;
+            /** @description First illustration, if any. */
+            cover: components["schemas"]["Illustration"] | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Finished On
+             * @description Local date the lesson was finished.
+             */
+            finished_on: string | null;
+            /** Flag Note */
+            flag_note: string | null;
+            /** Flagged At */
+            flagged_at: string | null;
+            /** Further */
+            further: components["schemas"]["FurtherItem"][];
+            /** Glossary */
+            glossary: components["schemas"]["GlossaryEntry"][];
+            /** Go Deeper */
+            go_deeper: components["schemas"]["Direction"][];
+            /** Hook */
+            hook: string;
+            /** Id */
+            id: string;
+            /** Illustrations */
+            illustrations: components["schemas"]["Illustration"][];
+            /** Key Ideas */
+            key_ideas: string[];
+            /**
+             * Local Date
+             * Format: date
+             */
+            local_date: string;
+            /** Model */
+            model: string | null;
+            /**
+             * Origin
+             * @enum {string}
+             */
+            origin: "daily" | "surprise" | "subject" | "topic" | "follow_up";
+            /** Parent Id */
+            parent_id: string | null;
+            /** Part */
+            part: number;
+            /** Prompt Version */
+            prompt_version: string;
+            /** Rated At */
+            rated_at: string | null;
+            /** Reading Minutes */
+            reading_minutes: number;
+            /**
+             * Request Text
+             * @description The owner's topic or question, if any.
+             */
+            request_text: string | null;
+            state: components["schemas"]["LessonState"];
+            /**
+             * Subject
+             * @enum {string}
+             */
+            subject: "art" | "history" | "film" | "words" | "geography" | "science" | "math" | "computing" | "philosophy" | "literature" | "music";
+            /** Tags */
+            tags: string[];
+            /**
+             * Thread
+             * @description Every lesson in this thread, oldest first, including this one.
+             */
+            thread: components["schemas"]["ThreadEntry"][];
+            /** Thread Root Id */
+            thread_root_id: string;
+            /** Title */
+            title: string;
         };
         /** FieldError */
         FieldError: {
