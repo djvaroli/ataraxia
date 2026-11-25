@@ -28,26 +28,35 @@ class UnsupportedSchemaError(RuntimeError):
     """The database was written by a newer version of the application."""
 
 
-def migrate(database: Database) -> int:
-    """Bring the database to `SCHEMA_VERSION` and return the version found before.
+class MigrationError(RuntimeError):
+    """A migration left rows that violate a foreign key; nothing was committed."""
+
+
+def migrate(database: Database, migrations: Sequence[Sequence[str]] = MIGRATIONS) -> int:
+    """Bring the database to the latest version and return the version found before.
 
     Safe to call from several processes at once: the version is read inside an
     immediate write transaction, so only one process applies each migration.
-    Raises `UnsupportedSchemaError` instead of touching a newer schema.
+    Foreign keys are off while migrating (so a table rebuild cannot cascade
+    deletes) and checked before commit. Raises `UnsupportedSchemaError` instead of
+    touching a newer schema.
     """
+    target = len(migrations)
     database.path.parent.mkdir(parents=True, exist_ok=True)
     with database.connect() as connection:
         connection.execute("PRAGMA journal_mode = WAL")
-    with database.transaction() as connection:
+    with database.transaction(foreign_keys=False) as connection:
         found = int(connection.execute("PRAGMA user_version").fetchone()[0])
-        if found > SCHEMA_VERSION:
+        if found > target:
             raise UnsupportedSchemaError(
-                f"Database schema {found} is newer than supported {SCHEMA_VERSION}"
+                f"Database schema {found} is newer than supported {target}"
             )
-        for statements in MIGRATIONS[found:]:
+        for statements in migrations[found:]:
             for statement in statements:
                 connection.execute(statement)
-        connection.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
+        if connection.execute("PRAGMA foreign_key_check").fetchone() is not None:
+            raise MigrationError("Migration left rows that violate a foreign key")
+        connection.execute(f"PRAGMA user_version = {target}")
     return found
 
 

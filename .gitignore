@@ -1,7 +1,9 @@
 # Incomplete handoff drafts; completed records are tracked.
 /.handoff/**/*.tmp
 
-# Local configuration and build output.
+# Local configuration, data, and build output.
+/data/
+/backend/data/
 .env
 .env.*
 !.env.example

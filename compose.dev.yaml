@@ -10,10 +10,12 @@ services:
   api:
     build:
       target: development
+    user: app
     volumes:
       - ./backend/src:/app/src:ro
   worker:
     build:
       target: development
+    user: app
     volumes:
       - ./backend/src:/app/src:ro
