@@ -1,10 +1,15 @@
 """Lesson generation through the Claude Code CLI in print mode, on the owner's subscription.
 
-The CLI runs as a pure text-in, text-out call: no tools, MCP servers, project
-settings, or session history; an empty working directory; an explicit environment
-that never contains API keys (so the subscription is always what pays); and a hard
-timeout that ends the whole process group. The lesson comes back as structured
-output validated against `LessonContent`.
+The CLI runs with no tools, MCP servers, project settings, or session history; an
+empty working directory; an explicit environment that never contains API keys (so
+the subscription is always what pays); and a hard timeout that ends the whole
+process group. The lesson comes back as structured output validated against
+`LessonContent`.
+
+The CLI still expands `@path` mentions in the prompt into file contents, even with
+tools disabled, and the prompt carries owner text and stored lessons. Every `@` is
+therefore sent with a zero-width space after it, and the space is removed from the
+answer, so no prompt can make the worker read its own files (such as its login).
 """
 
 import json
@@ -15,7 +20,7 @@ import subprocess
 import tempfile
 import time
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from importlib import resources
 from typing import Protocol
@@ -37,6 +42,8 @@ PROMPT_VERSION = "lesson-2026-11-24"
 SYSTEM_PROMPT = resources.files("ataraxia.adapters.prompts").joinpath("lesson_system.md")
 MAX_MESSAGE_CHARS = 300
 SAFE_PATH = "/usr/local/bin:/usr/bin:/bin"
+AT = "@"
+INERT_AT = "@\u200b"  # "@" followed by a zero-width space: not a file mention
 
 
 @dataclass(frozen=True)
@@ -57,7 +64,13 @@ class CliRunner(Protocol):
 
 
 class SubprocessCliRunner:
-    """Runs the CLI in a fresh empty directory in its own process group."""
+    """Runs the CLI in a fresh empty directory in its own process group.
+
+    On timeout the group gets SIGTERM, then SIGKILL after `grace_seconds`.
+    """
+
+    def __init__(self, grace_seconds: float = 10) -> None:
+        self._grace_seconds = grace_seconds
 
     def run(
         self, args: Sequence[str], stdin: str, env: Mapping[str, str], timeout: float
@@ -82,15 +95,15 @@ class SubprocessCliRunner:
                 stdout, stderr = process.communicate(stdin, timeout=timeout)
             except subprocess.TimeoutExpired:
                 timed_out = True
-                stdout, stderr = _stop(process)
+                stdout, stderr = _stop(process, self._grace_seconds)
         return CliResult(process.returncode, stdout, stderr, timed_out, _elapsed_ms(started))
 
 
-def _stop(process: subprocess.Popen[str]) -> tuple[str, str]:
-    """Ask the process group to stop, then kill it if it does not within 10 seconds."""
+def _stop(process: subprocess.Popen[str], grace_seconds: float) -> tuple[str, str]:
+    """Ask the process group to stop, then kill it if it does not in time."""
     try:
         os.killpg(process.pid, signal.SIGTERM)
-        return process.communicate(timeout=10)
+        return process.communicate(timeout=grace_seconds)
     except subprocess.TimeoutExpired:
         os.killpg(process.pid, signal.SIGKILL)
         return process.communicate()
@@ -111,7 +124,7 @@ class ClaudeCliConfig:
     timeout_seconds: float
     home: str
     config_dir: str | None = None
-    oauth_token: str | None = None
+    oauth_token: str | None = field(default=None, repr=False)
 
 
 class ClaudeCliGenerator:
@@ -273,7 +286,23 @@ def build_prompt(brief: LessonBrief) -> str:
         )
         if section
     )
-    return "\n\n".join(parts) + "\n"
+    return defuse_mentions("\n\n".join(parts) + "\n")
+
+
+def defuse_mentions(prompt: str) -> str:
+    """Make every `@` inert so the CLI cannot treat text as a file to attach."""
+    return prompt.replace(AT, INERT_AT)
+
+
+def _restore_mentions(value: object) -> object:
+    """Undo `defuse_mentions` in the answer, in case the writer copied the space."""
+    if isinstance(value, str):
+        return value.replace(INERT_AT, AT)
+    if isinstance(value, list):
+        return [_restore_mentions(item) for item in value]
+    if isinstance(value, dict):
+        return {key: _restore_mentions(item) for key, item in value.items()}
+    return value
 
 
 def _follow_up_section(brief: LessonBrief) -> str:
@@ -339,15 +368,20 @@ def parse_result(result: CliResult, brief: LessonBrief) -> GeneratedLesson:
     except (json.JSONDecodeError, ValidationError):
         detail = _first_line(result.stderr) or f"exit status {result.returncode}"
         raise GenerationError("claude_error", f"The CLI returned no result ({detail})") from None
-    usage = _usage(payload, result.duration_ms)
     if payload.is_error or result.returncode != 0:
-        raise GenerationError(_classify(payload), _first_line(payload.result or ""), usage)
+        code = _classify(payload)
+        answered = {"claude_auth": False, "claude_usage_limit": True, "invalid_output": True}.get(
+            code
+        )
+        usage = _usage(payload, result.duration_ms, logged_in=answered)
+        raise GenerationError(code, _first_line(payload.result or ""), usage)
+    usage = _usage(payload, result.duration_ms, logged_in=True)
     if payload.structured_output is None:
         raise GenerationError(
             "invalid_output", f"No structured output ({payload.subtype or 'unknown'})", usage
         )
     try:
-        content = LessonContent.model_validate(payload.structured_output)
+        content = LessonContent.model_validate(_restore_mentions(payload.structured_output))
     except ValidationError as error:
         fields = sorted({".".join(str(part) for part in e["loc"]) for e in error.errors()})
         raise GenerationError(
@@ -370,7 +404,7 @@ def _classify(payload: _CliPayload) -> JobErrorCode:
     return "claude_error"
 
 
-def _usage(payload: _CliPayload, measured_ms: int) -> GenerationUsage:
+def _usage(payload: _CliPayload, measured_ms: int, logged_in: bool | None) -> GenerationUsage:
     def count(key: str) -> int:
         value = payload.usage.get(key)
         return value if isinstance(value, int) else 0
@@ -391,6 +425,7 @@ def _usage(payload: _CliPayload, measured_ms: int) -> GenerationUsage:
         output_tokens=count("output_tokens") or None,
         cost_usd=payload.total_cost_usd,
         login_expires_at=payload.credential_expires_at,
+        logged_in=logged_in,
     )
 
 

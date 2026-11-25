@@ -80,7 +80,12 @@ class LessonBrief:
 
 @dataclass(frozen=True)
 class GenerationUsage:
-    """What one generator call reported; every field may be missing."""
+    """What one generator call reported; every field may be missing.
+
+    `logged_in` is what the call proved about the account: False when the login was
+    refused, True when the model answered, None when it showed nothing (timeouts,
+    other failures, or a writer without an account).
+    """
 
     model: str | None = None
     duration_ms: int | None = None
@@ -88,6 +93,7 @@ class GenerationUsage:
     output_tokens: int | None = None
     cost_usd: float | None = None
     login_expires_at: datetime | None = None
+    logged_in: bool | None = None
 
 
 @dataclass(frozen=True)
@@ -128,7 +134,11 @@ class IllustrationResolver(Protocol):
 
 @dataclass(frozen=True)
 class LoginStatus:
-    """Whether the generator's account is signed in, and until when if known."""
+    """Whether the generator has a credential, and until when if known.
+
+    A credential can exist and still be refused (a revoked token), so a positive
+    answer is weaker evidence than a refused call.
+    """
 
     logged_in: bool
     expires_at: datetime | None = None

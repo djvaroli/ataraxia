@@ -190,18 +190,22 @@ The goal is that nobody but the owner can read the data or take over the host.
   failing closed when misconfigured.
 - **Model output.** Lesson Markdown is rendered without raw HTML; links in lessons
   are built by the frontend from search terms; image URLs come only from Wikipedia
-  responses on `upload.wikimedia.org`. The runtime frontend sends a Content Security
+  responses on `upload.wikimedia.org` or `thumb.wikimedia.org`. The runtime frontend sends a Content Security
   Policy that allows scripts only from its own origin.
 - **Claude CLI.** Runs only in the worker, with tools disabled, as a non-root user,
-  with no access to secrets other than its own login. The owner's topic text reaches
+  with no access to secrets other than its own login. The CLI still expands `@path`
+  mentions into file contents even without tools, so every `@` in a prompt is made
+  inert (a zero-width space follows it) and restored in the answer; otherwise a
+  topic or a stored lesson could make the worker read its own login file. The owner's topic text reaches
   the prompt, nothing else personal does.
 - **Inputs.** Pydantic validation with length limits on every request body; bounded
   pagination; daily cap and waiting-job limit on generation.
 - **Secrets.** Only in an untracked `.env` on the host and the Claude login volume;
   never in images, logs, or exports. Logs contain job IDs, codes, and timings, not
   tokens, prompts, or lesson text.
-- **Containers.** Non-root users, pinned images, no Docker socket mounts, restart
-  policies, bounded logs.
+- **Containers.** Non-root users, no Linux capabilities and `no-new-privileges` for
+  the API and worker, pinned images, no Docker socket mounts, restart policies,
+  bounded logs. Access logs record paths without query strings.
 
 ## Durability
 

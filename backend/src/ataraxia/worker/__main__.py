@@ -72,12 +72,13 @@ class LoginChecks:
         now = self._monotonic()
         if self._last is not None and now - self._last < self._interval:
             return
+        first = self._last is None
         self._last = now
         result = self._probe.status()
         if result is None:
             logger.warning("Could not check the Claude login")
             return
-        self._status.record_login(datetime.now(UTC), result)
+        self._status.record_login(datetime.now(UTC), result, confirm=first)
         if not result.logged_in:
             logger.warning(
                 "Claude is not signed in; run: docker compose exec -it worker claude auth login"

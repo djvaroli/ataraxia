@@ -71,6 +71,7 @@ Copy the root `.env.example` to `.env` only if you need different defaults. Comp
 | `ATARAXIA_MAX_LESSONS_PER_DAY` | `8`. Daily cap on prepared lessons; see [lessons](lessons.md#requests-and-jobs). |
 | `ATARAXIA_GENERATOR` | `claude` (worker). Writes lessons with the Claude Code CLI; `fake` writes sample lessons without Claude. |
 | `ATARAXIA_CLAUDE_MODEL` | `opus`. Any model name or alias the CLI accepts. |
+| `ATARAXIA_CLAUDE_TIMEOUT_SECONDS` | `600`. How long one lesson call may run before the worker stops it (30–1800). |
 | `CLAUDE_CODE_OAUTH_TOKEN` | Optional one-year token from `claude setup-token`; without it the worker uses the login on the `claude-config` volume. Never use an API key: the worker strips them so lessons always use the subscription. |
 
 The Compose stack requires no host-installed Node, Python tooling, or credentials. The host Python 3 standard library is sufficient for `scripts/smoke.py`. For editor support or direct commands, backend tooling lives in `backend/pyproject.toml` and `backend/uv.lock`; frontend scripts live in `frontend/package.json` and `frontend/package-lock.json`.

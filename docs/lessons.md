@@ -81,10 +81,15 @@ The worker runs the Claude Code CLI as a subprocess. Verified against version
 ```text
 claude -p --safe-mode --tools "" --strict-mcp-config --no-session-persistence
        --max-turns 3 --model <ATARAXIA_CLAUDE_MODEL>
-       --system-prompt-file <prompt file> --output-format json
+       --system-prompt <prompt text> --output-format json
        --json-schema <lesson schema>          (prompt on standard input)
 ```
 
+- The prompt text comes from `backend/src/ataraxia/adapters/prompts/lesson_system.md`.
+- The CLI turns `@path` in a prompt into that file's contents even with tools
+  disabled (verified on 2.1.332). Every `@` in the user message is followed by a
+  zero-width space, which the CLI does not treat as a mention, and the space is
+  removed from the answer. Re-check this when upgrading the CLI.
 - `--safe-mode` skips CLAUDE.md files, skills, plugins, hooks, MCP servers, and
   memory; `--tools ""` removes every built-in tool. Structured output still works
   (Claude Code returns it through its own internal tool, which is why `--max-turns`
@@ -158,9 +163,10 @@ For each requested title the worker asks Wikipedia's Action API (`action=query`,
 `prop=pageimages|info`, `pilicense=any`, `redirects=1`, thumbnail width 1280) over
 HTTPS with a descriptive User-Agent, a 5-second timeout, and a small response limit.
 `pilicense=any` includes the non-free lead images Wikipedia itself shows (film
-posters, modern artworks); this private app displays them the same way. Only image
-URLs on `upload.wikimedia.org` are kept, with the article's canonical URL as the
-source link. Titles that do not resolve are dropped; a lesson without images is fine.
+posters, modern artworks); this private app displays them the same way. Only HTTPS
+image URLs on `upload.wikimedia.org` or `thumb.wikimedia.org` (Wikipedia now serves
+thumbnails from both) are kept, without tracking parameters, with the article's
+canonical URL as the source link. Titles that do not resolve are dropped; a lesson without images is fine.
 Wikipedia lookups never delay publication by more than about 15 seconds in total.
 
 ## Recording activity

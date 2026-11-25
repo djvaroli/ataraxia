@@ -34,13 +34,14 @@ FROM base AS development
 RUN uv sync --locked
 COPY tests ./tests
 ENV PATH="/app/.venv/bin:$PATH"
-CMD ["uvicorn", "ataraxia.api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# No access log: query strings carry search terms. nginx logs paths without them.
+CMD ["uvicorn", "ataraxia.api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--no-access-log"]
 
 FROM base AS runtime
 RUN uv sync --locked --no-dev --no-editable
 ENV PATH="/app/.venv/bin:$PATH"
 USER app
-CMD ["uvicorn", "ataraxia.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "ataraxia.api.main:app", "--host", "0.0.0.0", "--port", "8000", "--no-access-log"]
 
 # The worker: runtime plus the CLI. The login lives on a volume at CLAUDE_CONFIG_DIR.
 FROM runtime AS worker

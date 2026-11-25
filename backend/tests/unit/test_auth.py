@@ -199,6 +199,17 @@ class TestLocalMode:
         relayed = {"host": "localhost", "x-forwarded-for": "100.64.0.7, 127.0.0.1"}
         assert not is_local_request(relayed)
 
+    def test_cross_site_requests_are_refused(self) -> None:
+        assert not is_local_request({"host": "localhost", "origin": "https://evil.example"})
+        assert not is_local_request({"host": "localhost", "sec-fetch-site": "cross-site"})
+        assert is_local_request(
+            {
+                "host": "localhost:8080",
+                "origin": "http://localhost:8080",
+                "sec-fetch-site": "same-origin",
+            }
+        )
+
     def test_host_name(self) -> None:
         assert host_name("[::1]:80") == "[::1]"
         assert host_name("LocalHost:1") == "localhost"

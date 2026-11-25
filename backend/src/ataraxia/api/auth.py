@@ -8,6 +8,7 @@ forwarded request cannot use it. Local mode must never run on a reachable host.
 
 from collections.abc import Mapping
 from dataclasses import dataclass
+from urllib.parse import urlsplit
 
 from ataraxia.api.errors import ApiError
 from ataraxia.application.ports import (
@@ -52,6 +53,12 @@ def is_local_request(headers: Mapping[str, str]) -> bool:
     if any(name in headers for name in FORWARDED_IDENTITY_HEADERS):
         return False
     if "," in headers.get("x-forwarded-for", ""):
+        return False
+    # A page on another site can send simple cross-site requests to localhost.
+    if headers.get("sec-fetch-site", "").lower() == "cross-site":
+        return False
+    origin = headers.get("origin")
+    if origin is not None and host_name(urlsplit(origin).netloc) not in LOCAL_HOSTS:
         return False
     return host_name(headers.get("host", "")) in LOCAL_HOSTS
 

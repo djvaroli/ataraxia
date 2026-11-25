@@ -132,7 +132,7 @@ class LessonWorker:
             },
         )
         self._jobs.publish(publication, generated.usage, event)
-        self._status.record_call(finished.now, None, generated.usage.login_expires_at)
+        self._status.record_call(finished.now, None, generated.usage)
         logger.info("Job %s succeeded", job.id)
         return True
 
@@ -181,7 +181,7 @@ class LessonWorker:
             moment.now,
             _failed_event(moment, job, code),
         )
-        self._status.record_call(moment.now, code, usage.login_expires_at)
+        self._status.record_call(moment.now, code, usage)
         logger.info("Job %s attempt %d failed: %s", job.id, attempts, code)
 
     def _brief(

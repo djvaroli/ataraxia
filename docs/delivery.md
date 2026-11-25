@@ -54,7 +54,8 @@ database survives container recreation and that only nginx publishes a port.
 - CLI results map to the error codes in [lessons](lessons.md#attempts-and-errors).
 - The prompt includes the subject guidance, length target, recent titles, and taste
   hints; validation rejects out-of-range output.
-- Illustrations keep only `upload.wikimedia.org` images and never block publication.
+- Illustrations keep only HTTPS images on `upload.wikimedia.org` or `thumb.wikimedia.org`
+  and never block publication.
 - Unit tests use a fake CLI runner and fake Wikipedia client. Real lessons are
   generated through the CLI with the owner's subscription and inspected before merge.
 
