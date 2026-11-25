@@ -1,0 +1,211 @@
+/* Shared controls and typographic pieces. */
+
+.label {
+  font-family: var(--sans);
+  font-size: var(--label-size);
+  font-weight: 560;
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
+  line-height: 1.3;
+}
+
+.subject {
+  composes: label;
+  color: var(--pigment);
+}
+
+.meta {
+  font-family: var(--sans);
+  font-size: 0.8125rem;
+  font-weight: 420;
+  color: var(--ink-faint);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.sectionTitle {
+  composes: label;
+  color: var(--ink-faint);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 0 1.25rem;
+}
+
+.sectionTitle::after {
+  content: '';
+  flex: 1;
+  border-top: 1px solid var(--rule);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  min-height: 2.75rem;
+  padding: 0.55rem 1.1rem;
+  border: 1px solid var(--ink);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 0.9375rem;
+  font-weight: 540;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  transition:
+    background-color var(--fast) var(--ease),
+    color var(--fast) var(--ease),
+    transform var(--fast) var(--ease),
+    opacity var(--fast) var(--ease);
+}
+
+.button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(1px);
+  opacity: 0.85;
+}
+
+.button:disabled {
+  border-color: var(--rule-strong);
+  color: var(--ink-faint);
+}
+
+.primary {
+  composes: button;
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--ink) 88%, var(--paper));
+}
+
+.primary:disabled {
+  background: transparent;
+}
+
+/* A text control: no box, an underline on hover; still 44px tall. */
+.quiet {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-soft);
+  font-family: var(--sans);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition:
+    color var(--fast) var(--ease),
+    transform var(--fast) var(--ease);
+}
+
+.quiet:hover:not(:disabled) {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.25em;
+}
+
+.quiet:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.quiet:disabled {
+  color: var(--ink-faint);
+  opacity: 0.7;
+}
+
+.iconButton {
+  display: inline-grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 0;
+  border-radius: 2px;
+  background: none;
+  color: var(--ink);
+  transition: transform var(--fast) var(--ease);
+}
+
+.iconButton:active {
+  transform: scale(0.94);
+}
+
+.field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.fieldLabel {
+  font-family: var(--sans);
+  font-size: 0.875rem;
+  font-weight: 540;
+  color: var(--ink-soft);
+}
+
+.input {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.55rem 0;
+  border: 0;
+  border-bottom: 1px solid var(--rule-strong);
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--serif);
+  font-size: 1.125rem;
+  transition: border-color var(--fast) var(--ease);
+}
+
+.input:focus-visible {
+  outline: none;
+  border-bottom-color: var(--ink);
+  box-shadow: 0 1px 0 0 var(--ink);
+}
+
+.input::placeholder {
+  color: var(--ink-faint);
+  font-style: italic;
+}
+
+.textarea {
+  composes: input;
+  min-height: 5.5rem;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.error {
+  font-family: var(--sans);
+  font-size: 0.875rem;
+  color: var(--alert);
+  margin: 0;
+}
+
+.notice {
+  margin: 0;
+  padding: 0.1rem 0 0.1rem 0.9rem;
+  border-left: 2px solid var(--rule-strong);
+  font-family: var(--sans);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.notice strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.code {
+  font-family: var(--mono);
+  font-size: 0.85em;
+  overflow-wrap: anywhere;
+}

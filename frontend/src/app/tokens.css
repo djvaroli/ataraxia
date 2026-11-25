@@ -1,51 +1,120 @@
+/*
+ * Shared design tokens: paper and ink, one muted pigment per subject, type,
+ * spacing, and motion. Pigments are checked for WCAG AA contrast as text on
+ * the page background in both themes.
+ */
 :root {
-  font-family: ui-sans-serif, system-ui, sans-serif;
-  color: #263c35;
-  background: #f5f4ee;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  --surface: #fffef9;
-  --muted: #596b61;
-  --accent: #41634f;
-  --border: #d8dfd4;
+  color-scheme: light dark;
+
+  --paper: #f5f0e6;
+  --paper-deep: #ede6d8;
+  --ink: #211d18;
+  --ink-soft: #4e463c;
+  --ink-faint: #6b6255;
+  --rule: #d8cdb9;
+  --rule-strong: #b9ab93;
+  --focus: #2c5a8a;
+  --alert: #9b3a2f;
+
+  --pigment-art: #9b3a2f; /* madder */
+  --pigment-history: #7a5230; /* umber */
+  --pigment-film: #3e4c7c; /* indigo */
+  --pigment-words: #86621a; /* ochre */
+  --pigment-geography: #2d6b5f; /* verdigris */
+  --pigment-science: #2c5a8a; /* lapis */
+  --pigment-math: #4b5966; /* slate */
+  --pigment-computing: #4c6a46; /* terre verte */
+  --pigment-philosophy: #7a3d52; /* plum */
+  --pigment-literature: #9a4e2a; /* burnt sienna */
+  --pigment-music: #5a6a28; /* sap green */
+
+  --serif:
+    'Newsreader Variable', 'Iowan Old Style', 'Palatino Linotype', Georgia,
+    serif;
+  --sans: 'Hanken Grotesk Variable', 'Helvetica Neue', Arial, sans-serif;
+  --mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --text-reading: 1.1875rem;
+  --leading-reading: 1.65;
+  --measure: 35rem;
+  --column: 40rem;
+  --gutter: clamp(1.25rem, 5vw, 2rem);
+
+  --label-size: 0.75rem;
+  --label-tracking: 0.12em;
+
+  --ease: cubic-bezier(0.2, 0.6, 0.2, 1);
+  --fast: 150ms;
+  --medium: 220ms;
+
+  --nav-height: 3.5rem;
 }
 
-* {
-  box-sizing: border-box;
-}
-body {
-  margin: 0;
-  min-width: 320px;
-}
-a {
-  color: inherit;
-}
-button {
-  font: inherit;
-  min-height: 44px;
-  padding: 0.5rem 1rem;
-  border: 1px solid var(--accent);
-  border-radius: 0.5rem;
-  color: inherit;
-  background: transparent;
-  cursor: pointer;
-}
-button:disabled {
-  cursor: wait;
-}
-:focus-visible {
-  outline: 3px solid var(--accent);
-  outline-offset: 5px;
+@media (min-width: 40rem) {
+  :root {
+    --text-reading: 1.25rem;
+  }
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    color: #e4ece3;
-    background: #18241f;
-    --surface: #23332a;
-    --muted: #b5c5b7;
-    --accent: #b4cba9;
-    --border: #415547;
+    --paper: #15130f;
+    --paper-deep: #1d1a15;
+    --ink: #e9e0cd;
+    --ink-soft: #c2b8a4;
+    --ink-faint: #9a907e;
+    --rule: #3a342b;
+    --rule-strong: #5a5143;
+    --focus: #86b0de;
+    --alert: #db8c7f;
+
+    --pigment-art: #db8c7f;
+    --pigment-history: #cfa77d;
+    --pigment-film: #9eaad8;
+    --pigment-words: #d6b062;
+    --pigment-geography: #7dbfb1;
+    --pigment-science: #86b0de;
+    --pigment-math: #a7b6c2;
+    --pigment-computing: #a2c098;
+    --pigment-philosophy: #d394ae;
+    --pigment-literature: #dc9670;
+    --pigment-music: #b3c47a;
   }
+}
+
+[data-subject] {
+  --pigment: var(--ink-soft);
+}
+[data-subject='art'] {
+  --pigment: var(--pigment-art);
+}
+[data-subject='history'] {
+  --pigment: var(--pigment-history);
+}
+[data-subject='film'] {
+  --pigment: var(--pigment-film);
+}
+[data-subject='words'] {
+  --pigment: var(--pigment-words);
+}
+[data-subject='geography'] {
+  --pigment: var(--pigment-geography);
+}
+[data-subject='science'] {
+  --pigment: var(--pigment-science);
+}
+[data-subject='math'] {
+  --pigment: var(--pigment-math);
+}
+[data-subject='computing'] {
+  --pigment: var(--pigment-computing);
+}
+[data-subject='philosophy'] {
+  --pigment: var(--pigment-philosophy);
+}
+[data-subject='literature'] {
+  --pigment: var(--pigment-literature);
+}
+[data-subject='music'] {
+  --pigment: var(--pigment-music);
 }

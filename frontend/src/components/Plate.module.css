@@ -1,0 +1,41 @@
+.plate {
+  margin: 2.25rem 0;
+}
+
+.frame {
+  max-height: 70svh;
+  display: flex;
+  justify-content: center;
+  background: var(--paper-deep);
+}
+
+.frame img {
+  display: block;
+  max-width: 100%;
+  max-height: 70svh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+@media (prefers-color-scheme: dark) {
+  .frame img {
+    filter: brightness(0.9);
+  }
+}
+
+.caption {
+  margin-top: 0.7rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--rule);
+  font-family: var(--sans);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--ink-faint);
+  text-wrap: pretty;
+}
+
+.source {
+  color: var(--ink-soft);
+  white-space: nowrap;
+}

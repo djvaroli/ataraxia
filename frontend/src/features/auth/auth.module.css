@@ -1,0 +1,64 @@
+.page {
+  max-width: 26rem;
+  min-height: 100svh;
+  margin: 0 auto;
+  padding: clamp(3rem, 14vh, 7rem) var(--gutter) 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  animation: enter var(--medium) var(--ease);
+}
+
+.wordmark {
+  margin: 0;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--ink);
+  font-family: var(--serif);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+
+.headline {
+  font-size: clamp(2rem, 9vw, 2.6rem);
+  line-height: 1.12;
+  font-style: italic;
+  font-weight: 350;
+  letter-spacing: -0.01em;
+}
+
+.form {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.form button {
+  justify-self: start;
+  min-width: 9rem;
+}
+
+.quiet,
+.footnote {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+.footnote {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--rule);
+  font-size: 0.8125rem;
+  color: var(--ink-faint);
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
