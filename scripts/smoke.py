@@ -1,8 +1,11 @@
 """Exercise the real stack in a unique disposable project and data volume."""
 
 import argparse
+import base64
 import json
 import os
+import re
+import socket
 import subprocess
 import time
 from collections.abc import Callable
@@ -109,6 +112,38 @@ def wait_for(check: Callable[[], bool], what: str) -> None:
     raise AssertionError(f"Timed out waiting for {what}")
 
 
+IDLE_SOCKET_SECONDS = 35
+
+
+def vite_socket_stays_open(base: str, seconds: float) -> bool:
+    """Open Vite's development WebSocket through nginx; False if it closes while idle.
+
+    Vite reloads the page whenever this socket drops, so an edge timeout shorter
+    than a reader's pause makes pages reload on their own.
+    """
+    token = re.search(r'const wsToken = "([^"]+)"', request(base, "/@vite/client")[1])
+    assert token, "Vite client has no WebSocket token"
+    host, port = base.removeprefix("http://").rsplit(":", 1)
+    key = base64.b64encode(os.urandom(16)).decode()
+    handshake = (
+        f"GET /?token={token.group(1)} HTTP/1.1\r\nHost: localhost:{port}\r\n"
+        "Upgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Version: 13\r\n"
+        f"Sec-WebSocket-Key: {key}\r\nSec-WebSocket-Protocol: vite-hmr\r\n\r\n"
+    )
+    with socket.create_connection((host, int(port)), timeout=5) as connection:
+        connection.sendall(handshake.encode())
+        assert connection.recv(4096).startswith(b"HTTP/1.1 101"), "WebSocket refused"
+        deadline = time.monotonic() + seconds
+        while (left := deadline - time.monotonic()) > 0:
+            connection.settimeout(left)
+            try:
+                if not connection.recv(4096):
+                    return False
+            except TimeoutError:
+                return True
+    return True
+
+
 def wait_ready(base: str) -> None:
     deadline = time.monotonic() + 45
     while time.monotonic() < deadline:
@@ -142,6 +177,10 @@ def main() -> None:
             assert request(base, "/@vite/client")[0] == 200
             assert request(base, "/src/main.tsx")[0] == 200
             print("Vite development modules are served through nginx", flush=True)
+            assert vite_socket_stays_open(base, IDLE_SOCKET_SECONDS), (
+                "nginx closed Vite's idle WebSocket, which makes the page reload"
+            )
+            print(f"Vite's WebSocket stayed open for {IDLE_SOCKET_SECONDS}s idle", flush=True)
         assert request(base, "/api/health/live") == (200, '{"status":"ok"}')
         wait_ready(base)
         assert request(base, "/api/v1/missing")[0] == 404

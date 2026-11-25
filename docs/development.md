@@ -128,7 +128,7 @@ python3 scripts/smoke.py
 
 `scripts/smoke.py` creates a different unique project, random edge port, and disposable data volume, and runs in local mode with the fake generator. It builds the runtime images, checks the frontend and API through nginx, requests a lesson and waits for the worker to prepare it, reads it back, confirms that a request with a non-local `Host` gets 403, verifies that internal service ports are not published, and checks WAL mode and the worker heartbeat. It then writes a test sentinel, recreates the API and worker to verify durability, and recreates the HTTP upstreams to check nginx recovery. Cleanup runs on success or failure. It never addresses the normal `ataraxia` project's volume.
 
-Use `python3 scripts/smoke.py --dev` to run the same checks with the development override and verify that nginx serves Vite's client and source modules. CI checks the compiled runtime; run this variant when changing the development setup.
+Use `python3 scripts/smoke.py --dev` to run the same checks with the development override and verify that nginx serves Vite's client and source modules and keeps Vite's WebSocket open while idle (Vite reloads the page whenever that socket drops). CI checks the compiled runtime; run this variant when changing the development setup.
 
 To regenerate the frontend API contract after an endpoint/model change, build each image before redirecting its output (`run --build` can print build logs to standard output), and build the frontend image after the new snapshot exists, because the image copies it:
 
