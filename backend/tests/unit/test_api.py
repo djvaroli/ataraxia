@@ -169,3 +169,21 @@ def test_limits_and_conflicts(stack: Stack) -> None:
     assert client.post("/api/v1/activity", json={"type": "lesson.opened"}).status_code == 422
     bad_cursor = client.get("/api/v1/lessons", params={"cursor": "%%%"})
     assert bad_cursor.status_code == 422
+
+
+def test_unexpected_errors_return_error_body_without_details(
+    tmp_path: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    services = create_api_services(local_settings(tmp_path))
+
+    def broken() -> None:
+        raise ValueError("stored lesson text")
+
+    app = create_app(lambda: services)
+    with TestClient(app, base_url="http://localhost") as client:
+        object.__setattr__(services.progress, "progress", broken)
+        response = client.get("/api/v1/progress")
+    assert response.status_code == 500
+    assert response.json()["error"]["code"] == "unavailable"
+    assert "stored lesson text" not in caplog.text
+    assert "ValueError" in caplog.text

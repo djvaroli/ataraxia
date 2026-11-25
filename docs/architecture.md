@@ -166,11 +166,13 @@ Firebase web configuration comes from environment variables at runtime through
 
 **local.** No sign-in; every request is the owner. It exists so the app can be tried
 before a Firebase project exists. The API logs a warning at startup and the UI shows
-that it is in local mode. It accepts only requests whose `Host` is `localhost` or
-`127.0.0.1` (any port) and that carry no Tailscale identity headers, so a request
-forwarded from another machine (for example by `tailscale serve`) or a DNS-rebinding
-page is refused with 403. Only the development override selects it; never use that
-override on the VM.
+that it is in local mode. It accepts only requests whose `Host` is `localhost`,
+`127.0.0.1`, or `[::1]` (any port), that carry no Tailscale headers, and that passed
+through no proxy besides nginx (one `X-Forwarded-For` entry). That refuses a
+DNS-rebinding page and a request relayed by `tailscale serve` with 403, but a client
+that can reach nginx directly chooses its own `Host`, so local mode is safe only
+while nginx listens on loopback. Only the development override selects it; never use
+that override on the VM.
 
 The owner creates the Firebase project and account by hand, enables only the
 email/password provider, and turns off sign-up under Authentication → Settings →

@@ -7,6 +7,7 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException
+from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from ataraxia.api.schemas import ErrorBody, ErrorCode, ErrorDetail, FieldError
 from ataraxia.application.errors import ConflictError, LimitReachedError, NotFoundError
@@ -50,7 +51,41 @@ def error_response(
     return JSONResponse(body.model_dump(mode="json"), status_code=status, headers=headers)
 
 
+class ContainUnexpectedErrors:
+    """Answer an unhandled exception with a 500 `ErrorBody` and log only its type and path.
+
+    Starlette's own server-error handler re-raises after responding, and the server
+    then logs the full traceback, whose messages can contain stored lesson text.
+    This middleware sits inside it and does not re-raise.
+    """
+
+    def __init__(self, app: ASGIApp) -> None:
+        self._app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self._app(scope, receive, send)
+            return
+        started = False
+
+        async def tracked(message: Message) -> None:
+            nonlocal started
+            if message["type"] == "http.response.start":
+                started = True
+            await send(message)
+
+        try:
+            await self._app(scope, receive, tracked)
+        except Exception as error:
+            logger.error("Unhandled %s on %s", type(error).__name__, scope.get("path", ""))
+            if not started:
+                response = error_response(500, "unavailable", "Something went wrong. Try again.")
+                await response(scope, receive, send)
+
+
 def install_error_handlers(app: FastAPI) -> None:
+    app.add_middleware(ContainUnexpectedErrors)
+
     @app.exception_handler(ApiError)
     def api_error(_: Request, error: ApiError) -> JSONResponse:
         return error_response(error.status, error.code, error.message, headers=error.headers)
@@ -85,12 +120,6 @@ def install_error_handlers(app: FastAPI) -> None:
         code = _STATUS_CODES.get(error.status_code, "unavailable")
         message = error.detail if isinstance(error.detail, str) else "The request failed."
         return error_response(error.status_code, code, message, headers=error.headers)
-
-    @app.exception_handler(Exception)
-    def unexpected(request: Request, error: Exception) -> JSONResponse:
-        # Only the type and path: messages can contain stored content.
-        logger.error("Unhandled %s on %s", type(error).__name__, request.url.path)
-        return error_response(500, "unavailable", "Something went wrong. Try again.")
 
 
 def _field_name(location: object) -> str:

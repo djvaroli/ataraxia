@@ -17,7 +17,7 @@ curl -X POST -H 'Content-Type: application/json' -d '{"kind": "surprise"}' http:
 curl http://localhost:8080/api/v1/today
 ```
 
-Local mode answers only requests addressed to `localhost`, `127.0.0.1`, or `[::1]` that carry no Tailscale identity headers; anything else gets 403. The other services communicate through this project's private Compose network. Local HTTP is fine on your own machine; remote access is described in [deployment](deployment.md).
+Local mode answers only requests addressed to `localhost`, `127.0.0.1`, or `[::1]` that no other proxy relayed (no Tailscale headers, one `X-Forwarded-For` entry from nginx); anything else gets 403. It relies on nginx listening on loopback, so never use it on a reachable host. The other services communicate through this project's private Compose network. Local HTTP is fine on your own machine; remote access is described in [deployment](deployment.md).
 
 The development override mounts frontend source and the HTML entry point into Vite, proxies its websocket through nginx, and mounts backend source into the API with reload enabled. The worker uses that source too; after worker edits run `docker compose restart worker`. Rebuild after dependency or configuration changes.
 

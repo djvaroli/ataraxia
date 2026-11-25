@@ -192,6 +192,12 @@ class TestLocalMode:
     def test_tailscale_identity_headers_are_refused(self) -> None:
         assert not is_local_request({"host": "localhost", "tailscale-user-login": "a@b.c"})
         assert not is_local_request({"host": "localhost", "tailscale-user-name": "A"})
+        assert not is_local_request({"host": "localhost", "tailscale-funnel-request": "?1"})
+
+    def test_requests_relayed_by_another_proxy_are_refused(self) -> None:
+        assert is_local_request({"host": "localhost", "x-forwarded-for": "172.18.0.1"})
+        relayed = {"host": "localhost", "x-forwarded-for": "100.64.0.7, 127.0.0.1"}
+        assert not is_local_request(relayed)
 
     def test_host_name(self) -> None:
         assert host_name("[::1]:80") == "[::1]"

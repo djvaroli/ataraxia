@@ -144,7 +144,8 @@ class LessonWorker:
             raise
         except Exception as error:
             # A generator bug must not leave the job running until the next restart.
-            logger.exception("Lesson generator failed unexpectedly")
+            # The type only: messages can contain lesson text.
+            logger.error("Lesson generator failed unexpectedly: %s", type(error).__name__)
             raise GenerationError("claude_error", "Unexpected generator failure") from error
         if brief.kind != "topic" and generated.content.subject != brief.subject:
             raise GenerationError(
@@ -155,8 +156,10 @@ class LessonWorker:
     def _resolve(self, generated: GeneratedLesson) -> list[Illustration]:
         try:
             return self._illustrations.resolve(generated.content.illustrations)
-        except Exception:
-            logger.exception("Illustration lookup failed; publishing without images")
+        except Exception as error:
+            logger.error(
+                "Illustration lookup failed (%s); publishing without images", type(error).__name__
+            )
             return []
 
     def _fail_attempt(

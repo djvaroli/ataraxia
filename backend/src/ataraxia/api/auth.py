@@ -2,8 +2,8 @@
 
 firebase mode: a verified Firebase ID token whose UID is the configured owner.
 local mode: no sign-in, but only for requests addressed to this machine by a local
-name and not forwarded by Tailscale, so another device or a DNS-rebinding page
-cannot use it.
+name and not relayed by Tailscale or another proxy, so a DNS-rebinding page or a
+forwarded request cannot use it. Local mode must never run on a reachable host.
 """
 
 from collections.abc import Mapping
@@ -18,7 +18,11 @@ from ataraxia.application.ports import (
 from ataraxia.config import AuthMode
 
 LOCAL_HOSTS = frozenset({"localhost", "127.0.0.1", "[::1]"})
-FORWARDED_IDENTITY_HEADERS = ("tailscale-user-login", "tailscale-user-name")
+FORWARDED_IDENTITY_HEADERS = (
+    "tailscale-user-login",
+    "tailscale-user-name",
+    "tailscale-funnel-request",
+)
 
 
 @dataclass(frozen=True)
@@ -39,7 +43,15 @@ def host_name(host: str) -> str:
 
 
 def is_local_request(headers: Mapping[str, str]) -> bool:
+    """A request sent to this machine by a local name and not relayed by another proxy.
+
+    The Host check stops DNS-rebinding pages, not a client that writes its own Host.
+    nginx adds one `X-Forwarded-For` entry; a second means another proxy (for example
+    `tailscale serve`) relayed the request. Tailscale's own headers mark it too.
+    """
     if any(name in headers for name in FORWARDED_IDENTITY_HEADERS):
+        return False
+    if "," in headers.get("x-forwarded-for", ""):
         return False
     return host_name(headers.get("host", "")) in LOCAL_HOSTS
 
