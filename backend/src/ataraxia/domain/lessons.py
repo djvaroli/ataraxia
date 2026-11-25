@@ -14,11 +14,12 @@ from ataraxia.domain.subjects import SubjectId
 LessonLength = Literal["short", "standard", "long"]
 FurtherKind = Literal["book", "film", "artwork", "music", "place", "article", "other"]
 
-# Approximate word-count targets given to the writer for each length setting.
+# Word-count targets given to the writer, at about 230 words a minute:
+# roughly 5, 10-15, and 20 minutes of reading.
 WORD_TARGETS: dict[LessonLength, tuple[int, int]] = {
-    "short": (900, 1200),
-    "standard": (1800, 2800),
-    "long": (3500, 4500),
+    "short": (1000, 1300),
+    "standard": (2300, 3200),
+    "long": (4000, 5000),
 }
 
 

@@ -382,6 +382,13 @@
           "preferences": {
             "$ref": "#/components/schemas/Preferences"
           },
+          "reading_sessions": {
+            "items": {
+              "$ref": "#/components/schemas/ReadingSession"
+            },
+            "title": "Reading Sessions",
+            "type": "array"
+          },
           "schema_version": {
             "title": "Schema Version",
             "type": "integer"
@@ -394,7 +401,8 @@
           "lessons",
           "jobs",
           "calls",
-          "events"
+          "events",
+          "reading_sessions"
         ],
         "title": "ExportDocument",
         "type": "object"
@@ -865,6 +873,19 @@
             "title": "Local Date",
             "type": "string"
           },
+          "next_attempt_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When a queued job will next be tried, e.g. after a usage limit.",
+            "title": "Next Attempt At"
+          },
           "parent_lesson_id": {
             "anyOf": [
               {
@@ -947,6 +968,7 @@
           "error_message",
           "lesson_id",
           "can_retry",
+          "next_attempt_at",
           "created_at",
           "started_at",
           "finished_at"
@@ -1633,7 +1655,7 @@
       },
       "ReadingReport": {
         "additionalProperties": false,
-        "description": "One reading interval, sent when the reader is left or hidden.",
+        "description": "Cumulative totals for one reader visit, sent every 30 s while visible and on hide.\n\nThe server keeps the largest values seen per session, so repeats and late\narrivals are harmless.",
         "properties": {
           "scroll": {
             "maximum": 1.0,
@@ -1642,17 +1664,70 @@
             "type": "number"
           },
           "seconds": {
-            "maximum": 1800.0,
-            "minimum": 1.0,
+            "maximum": 14400.0,
+            "minimum": 0.0,
             "title": "Seconds",
             "type": "integer"
+          },
+          "session_id": {
+            "pattern": "^[0-9a-f-]{36}$",
+            "title": "Session Id",
+            "type": "string"
           }
         },
         "required": [
+          "session_id",
           "seconds",
           "scroll"
         ],
         "title": "ReadingReport",
+        "type": "object"
+      },
+      "ReadingSession": {
+        "additionalProperties": false,
+        "properties": {
+          "furthest_scroll": {
+            "title": "Furthest Scroll",
+            "type": "number"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "lesson_id": {
+            "title": "Lesson Id",
+            "type": "string"
+          },
+          "local_date": {
+            "format": "date",
+            "title": "Local Date",
+            "type": "string"
+          },
+          "seconds": {
+            "title": "Seconds",
+            "type": "integer"
+          },
+          "started_at": {
+            "format": "date-time",
+            "title": "Started At",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "lesson_id",
+          "started_at",
+          "updated_at",
+          "local_date",
+          "seconds",
+          "furthest_scroll"
+        ],
+        "title": "ReadingSession",
         "type": "object"
       },
       "SavedUpdate": {

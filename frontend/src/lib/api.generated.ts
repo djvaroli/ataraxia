@@ -514,6 +514,8 @@ export interface components {
             /** Lessons */
             lessons: components["schemas"]["Lesson"][];
             preferences: components["schemas"]["Preferences"];
+            /** Reading Sessions */
+            reading_sessions: components["schemas"]["ReadingSession"][];
             /** Schema Version */
             schema_version: number;
         };
@@ -682,6 +684,11 @@ export interface components {
              * Format: date
              */
             local_date: string;
+            /**
+             * Next Attempt At
+             * @description When a queued job will next be tried, e.g. after a usage limit.
+             */
+            next_attempt_at: string | null;
             /** Parent Lesson Id */
             parent_lesson_id: string | null;
             /** Request Text */
@@ -923,13 +930,44 @@ export interface components {
         };
         /**
          * ReadingReport
-         * @description One reading interval, sent when the reader is left or hidden.
+         * @description Cumulative totals for one reader visit, sent every 30 s while visible and on hide.
+         *
+         *     The server keeps the largest values seen per session, so repeats and late
+         *     arrivals are harmless.
          */
         ReadingReport: {
             /** Scroll */
             scroll: number;
             /** Seconds */
             seconds: number;
+            /** Session Id */
+            session_id: string;
+        };
+        /** ReadingSession */
+        ReadingSession: {
+            /** Furthest Scroll */
+            furthest_scroll: number;
+            /** Id */
+            id: string;
+            /** Lesson Id */
+            lesson_id: string;
+            /**
+             * Local Date
+             * Format: date
+             */
+            local_date: string;
+            /** Seconds */
+            seconds: number;
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
         };
         /** SavedUpdate */
         SavedUpdate: {

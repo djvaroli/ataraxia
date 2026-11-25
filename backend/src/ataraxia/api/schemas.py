@@ -181,6 +181,9 @@ class Job(_Model):
     error_message: str | None = Field(description="Plain-language explanation of a failure.")
     lesson_id: str | None
     can_retry: bool
+    next_attempt_at: datetime | None = Field(
+        description="When a queued job will next be tried, e.g. after a usage limit."
+    )
     created_at: datetime
     started_at: datetime | None
     finished_at: datetime | None
@@ -277,9 +280,14 @@ class FlagUpdate(_Model):
 
 
 class ReadingReport(_Model):
-    """One reading interval, sent when the reader is left or hidden."""
+    """Cumulative totals for one reader visit, sent every 30 s while visible and on hide.
 
-    seconds: Annotated[int, Field(ge=1, le=1800)]
+    The server keeps the largest values seen per session, so repeats and late
+    arrivals are harmless.
+    """
+
+    session_id: Annotated[str, StringConstraints(pattern=r"^[0-9a-f-]{36}$")]
+    seconds: Annotated[int, Field(ge=0, le=14400)]
     scroll: Annotated[float, Field(ge=0, le=1)]
 
 
@@ -348,6 +356,16 @@ class GenerationCall(_Model):
     cost_usd: float | None
 
 
+class ReadingSession(_Model):
+    id: str
+    lesson_id: str
+    started_at: datetime
+    updated_at: datetime
+    local_date: date
+    seconds: int
+    furthest_scroll: float
+
+
 class ExportDocument(_Model):
     """Everything durable, for analysis and backup. `schema_version` is the database's."""
 
@@ -358,3 +376,4 @@ class ExportDocument(_Model):
     jobs: list[Job]
     calls: list[GenerationCall]
     events: list[ActivityEvent]
+    reading_sessions: list[ReadingSession]
