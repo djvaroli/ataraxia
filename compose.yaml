@@ -45,8 +45,18 @@ services:
     build: &backend-build
       context: ./backend
       target: runtime
-    environment: &backend-env
-      ATARAXIA_DATABASE_PATH: /data/ataraxia.db
+    environment:
+      <<: &backend-env
+        ATARAXIA_DATABASE_PATH: /data/ataraxia.db
+        ATARAXIA_DEFAULT_TIME_ZONE: ${ATARAXIA_DEFAULT_TIME_ZONE:-UTC}
+        ATARAXIA_MAX_LESSONS_PER_DAY: ${ATARAXIA_MAX_LESSONS_PER_DAY:-8}
+      # Only the development override selects local mode; never use it on the VM.
+      ATARAXIA_AUTH_MODE: ${ATARAXIA_AUTH_MODE:-firebase}
+      ATARAXIA_OWNER_UID: ${ATARAXIA_OWNER_UID:-}
+      ATARAXIA_FIREBASE_PROJECT_ID: ${ATARAXIA_FIREBASE_PROJECT_ID:-}
+      ATARAXIA_FIREBASE_API_KEY: ${ATARAXIA_FIREBASE_API_KEY:-}
+      ATARAXIA_FIREBASE_AUTH_DOMAIN: ${ATARAXIA_FIREBASE_AUTH_DOMAIN:-}
+      ATARAXIA_FIREBASE_APP_ID: ${ATARAXIA_FIREBASE_APP_ID:-}
     volumes: &backend-data
       - ataraxia-data:/data
     healthcheck:
@@ -57,7 +67,9 @@ services:
     <<: *service
     build: *backend-build
     command: ["python", "-m", "ataraxia.worker"]
-    environment: *backend-env
+    environment:
+      <<: *backend-env
+      ATARAXIA_GENERATOR: ${ATARAXIA_GENERATOR:-fake}
     volumes: *backend-data
     init: true
     stop_grace_period: 10s
