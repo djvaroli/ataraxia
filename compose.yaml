@@ -63,14 +63,22 @@ services:
       <<: *health
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health/ready', timeout=3)"]
 
+  # The only service with the Claude CLI and the Claude login.
   worker:
     <<: *service
-    build: *backend-build
+    build:
+      context: ./backend
+      target: worker
     command: ["python", "-m", "ataraxia.worker"]
     environment:
       <<: *backend-env
-      ATARAXIA_GENERATOR: ${ATARAXIA_GENERATOR:-fake}
-    volumes: *backend-data
+      ATARAXIA_GENERATOR: ${ATARAXIA_GENERATOR:-claude}
+      ATARAXIA_CLAUDE_MODEL: ${ATARAXIA_CLAUDE_MODEL:-opus}
+      # Optional one-year token from `claude setup-token`; otherwise the login volume.
+      CLAUDE_CODE_OAUTH_TOKEN: ${CLAUDE_CODE_OAUTH_TOKEN:-}
+    volumes:
+      - ataraxia-data:/data
+      - claude-config:/home/app/.claude
     init: true
     stop_grace_period: 10s
     depends_on:
@@ -82,3 +90,4 @@ services:
 
 volumes:
   ataraxia-data:
+  claude-config:

@@ -2484,6 +2484,18 @@
       "WorkerStatus": {
         "additionalProperties": false,
         "properties": {
+          "claude_logged_in": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Whether the worker's Claude login works; null until first checked.",
+            "title": "Claude Logged In"
+          },
           "heartbeat_at": {
             "anyOf": [
               {
@@ -2518,7 +2530,8 @@
         "required": [
           "online",
           "heartbeat_at",
-          "login_expires_at"
+          "login_expires_at",
+          "claude_logged_in"
         ],
         "title": "WorkerStatus",
         "type": "object"

@@ -162,6 +162,8 @@ MIGRATIONS: Sequence[Sequence[str]] = (
         "ALTER TABLE worker_status ADD COLUMN last_error_at TEXT",
         "ALTER TABLE worker_status ADD COLUMN login_expires_at TEXT",
     ),
+    # 3: whether the worker's Claude login works (NULL until checked).
+    ("ALTER TABLE worker_status ADD COLUMN claude_logged_in INTEGER",),
 )
 
 SCHEMA_VERSION = len(MIGRATIONS)

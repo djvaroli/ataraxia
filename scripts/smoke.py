@@ -162,6 +162,17 @@ def main() -> None:
             assert not json.loads(ports), f"Unexpected published ports: {service}"
         print("Routing and private ports passed", flush=True)
 
+        # Only the worker carries the Claude CLI; the API never does.
+        assert "Claude Code" in compose("exec", "-T", "worker", "claude", "--version")
+        api_cli = subprocess.run(
+            COMPOSE + ["exec", "-T", "api", "sh", "-c", "command -v claude"],
+            env=ENV,
+            capture_output=True,
+            text=True,
+        )
+        assert api_cli.returncode != 0, "The API image must not contain the Claude CLI"
+        print("Claude CLI present only in the worker", flush=True)
+
         assert sql("PRAGMA journal_mode") == "wal"
         wait_for(lambda: sql("SELECT COUNT(*) FROM worker_status") == "1", "worker heartbeat")
         sql("CREATE TABLE smoke_sentinel (value TEXT)")

@@ -99,6 +99,7 @@ class TodayService:
             online=online,
             heartbeat_at=record.heartbeat_at,
             login_expires_at=record.login_expires_at,
+            claude_logged_in=record.logged_in,
         )
 
 

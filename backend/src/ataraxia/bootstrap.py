@@ -5,7 +5,14 @@ This is the only module that decides which adapters run.
 
 import random
 from dataclasses import dataclass
+from pathlib import Path
 
+from ataraxia.adapters.claude_cli import (
+    ClaudeCliConfig,
+    ClaudeCliGenerator,
+    ClaudeCliLogin,
+    SubprocessCliRunner,
+)
 from ataraxia.adapters.clock import SystemClock
 from ataraxia.adapters.fake_generator import FakeLessonGenerator, NoIllustrations
 from ataraxia.adapters.firebase import FirebaseVerifier, GoogleSigningKeys, SigningKeySource
@@ -17,10 +24,16 @@ from ataraxia.adapters.sqlite.lessons import LessonRepository
 from ataraxia.adapters.sqlite.migrations import schema_version
 from ataraxia.adapters.sqlite.profile import ProfileRepository
 from ataraxia.adapters.sqlite.status import WorkerStatusRepository
+from ataraxia.adapters.wikipedia import WikipediaIllustrations
 from ataraxia.api.auth import OwnerPolicy
 from ataraxia.api.schemas import ClientConfig, FirebaseWebConfig
 from ataraxia.application.library import LibraryService
-from ataraxia.application.ports import Clock, IllustrationResolver, LessonGenerator
+from ataraxia.application.ports import (
+    Clock,
+    IllustrationResolver,
+    LessonGenerator,
+    LoginProbe,
+)
 from ataraxia.application.progress import ProgressService
 from ataraxia.application.reading import ReadingService
 from ataraxia.application.records import ActivityService, ExportService
@@ -175,12 +188,36 @@ def create_api_services(
     )
 
 
-def create_generator(settings: Settings) -> LessonGenerator:
+def claude_config(settings: Settings) -> ClaudeCliConfig:
+    return ClaudeCliConfig(
+        executable=settings.claude_executable,
+        model=settings.claude_model,
+        timeout_seconds=settings.claude_timeout_seconds,
+        home=str(Path.home()),
+        config_dir=settings.claude_config_dir or None,
+        oauth_token=settings.claude_oauth_token.get_secret_value() or None,
+    )
+
+
+@dataclass(frozen=True)
+class Writer:
+    """The lesson writer and its companions; `login` is None when there is no account."""
+
+    generator: LessonGenerator
+    illustrations: IllustrationResolver
+    login: LoginProbe | None
+
+
+def create_writer(settings: Settings) -> Writer:
     if settings.generator == "claude":
-        raise ConfigurationError(
-            "ATARAXIA_GENERATOR=claude arrives in L04; use ATARAXIA_GENERATOR=fake for now"
+        config = claude_config(settings)
+        runner = SubprocessCliRunner()
+        return Writer(
+            ClaudeCliGenerator(config, runner),
+            WikipediaIllustrations(),
+            ClaudeCliLogin(config, runner),
         )
-    return FakeLessonGenerator()
+    return Writer(FakeLessonGenerator(), NoIllustrations(), None)
 
 
 @dataclass(frozen=True)
@@ -188,6 +225,7 @@ class WorkerServices:
     database: Database
     worker: LessonWorker
     status: WorkerStatusRepository
+    login: LoginProbe | None
 
 
 def create_worker(
@@ -203,17 +241,23 @@ def create_worker(
     database = create_database(settings)
     repositories = Repositories.on(database)
     preferences = create_preferences(repositories, settings, clock)
+    writer = create_writer(settings)
     worker = LessonWorker(
         repositories.jobs,
         repositories.lessons,
         repositories.status,
         preferences,
-        generator or create_generator(settings),
-        illustrations or NoIllustrations(),
+        generator or writer.generator,
+        illustrations or writer.illustrations,
         rng or random.Random(),
         lessons_per_day=settings.max_lessons_per_day,
     )
-    return WorkerServices(database=database, worker=worker, status=repositories.status)
+    return WorkerServices(
+        database=database,
+        worker=worker,
+        status=repositories.status,
+        login=None if generator else writer.login,
+    )
 
 
 @dataclass(frozen=True)

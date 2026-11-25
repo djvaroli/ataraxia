@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 from support import World, count, event_types, make_world, prepare_lesson
 
+from ataraxia.adapters.sqlite.migrations import SCHEMA_VERSION
 from ataraxia.application.errors import ConflictError, NotFoundError
 from ataraxia.domain.errors import InvalidInputError
 
@@ -217,7 +218,7 @@ class TestExport:
         world.api.reading.record_reading(lesson_id, SESSION_A, 30, 0.2)
         world.api.preferences.update(lesson_length="long")
         document = world.api.export.export()
-        assert document.schema_version == 2
+        assert document.schema_version == SCHEMA_VERSION
         assert document.preferences.lesson_length == "long"
         assert [lesson.id for lesson in document.lessons] == [lesson_id]
         assert document.lessons[0].thread[0].id == lesson_id

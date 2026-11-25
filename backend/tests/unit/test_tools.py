@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 from support import World, make_world, prepare_lesson
 
+from ataraxia.adapters.sqlite.migrations import SCHEMA_VERSION
 from ataraxia.tools.__main__ import main
 
 
@@ -24,7 +25,7 @@ def test_export_to_stdout_and_file(world: World, tmp_path: Path) -> None:
     assert main(["export"], stdout=out) == 0
     document = json.loads(out.getvalue())
     assert [lesson["id"] for lesson in document["lessons"]] == [lesson_id]
-    assert document["schema_version"] == 2
+    assert document["schema_version"] == SCHEMA_VERSION
     target = tmp_path / "export.json"
     assert main(["export", "--output", str(target)]) == 0
     assert json.loads(target.read_text())["lessons"][0]["id"] == lesson_id

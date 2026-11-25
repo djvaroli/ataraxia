@@ -1231,6 +1231,11 @@ export interface components {
         };
         /** WorkerStatus */
         WorkerStatus: {
+            /**
+             * Claude Logged In
+             * @description Whether the worker's Claude login works; null until first checked.
+             */
+            claude_logged_in: boolean | null;
             /** Heartbeat At */
             heartbeat_at: string | null;
             /**

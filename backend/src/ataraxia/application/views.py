@@ -120,6 +120,9 @@ class WorkerStatus(_Model):
     login_expires_at: datetime | None = Field(
         description="When the worker's Claude login ends, if the CLI reported it."
     )
+    claude_logged_in: bool | None = Field(
+        description="Whether the worker's Claude login works; null until first checked."
+    )
 
 
 class DailySlot(_Model):

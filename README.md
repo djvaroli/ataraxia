@@ -23,7 +23,13 @@ With Docker Engine and Docker Compose v2.20+ installed, run from this directory:
 docker compose -f compose.yaml -f compose.dev.yaml up --build --detach --wait
 ```
 
-Open [localhost:8080](http://localhost:8080). nginx is the only published service and binds to loopback. Source edits reload the frontend and API; restart the worker after editing it. The development override runs in local mode (no sign-in, requests to `localhost` only) and prepares sample lessons with a fake writer, so no environment file or credentials are needed. Copy `.env.example` to `.env` to change the port, time zone, or daily lesson cap.
+Then log the worker in to Claude once (the login is kept on a volume):
+
+```sh
+docker compose exec -it worker claude auth login
+```
+
+Open the printed URL, sign in, and paste the code back. Open [localhost:8080](http://localhost:8080). nginx is the only published service and binds to loopback. The development override runs in local mode (no sign-in, requests to `localhost` only), so no other credentials are needed. Copy `.env.example` to `.env` to change the port, time zone, model, or daily lesson cap; set `ATARAXIA_GENERATOR=fake` to try the app with sample lessons and no Claude login. Source edits reload the frontend and API; restart the worker after editing it.
 
 ```sh
 curl --fail http://localhost:8080/api/health/ready

@@ -114,7 +114,12 @@ from `CLAUDE_CODE_OAUTH_TOKEN` in `.env` when that is set. Either:
 - run `claude setup-token` on a computer with a browser (it prints a one-year token)
   and put it in `.env` as `CLAUDE_CODE_OAUTH_TOKEN`, then recreate the worker.
 
-`docker compose exec worker claude auth status` shows the current state.
+An interactive login lasts about a month (the CLI reports its end as
+`credential_expires_at`); the one-year token is the better choice on the VM.
+`docker compose exec worker claude auth status` shows the current state. The worker
+runs that check at start and every 10 minutes and records the answer, along with
+what each Claude call shows about the login, so Today can say when the worker needs
+signing in before a lesson fails.
 
 ## Lesson content
 

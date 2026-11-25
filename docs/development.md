@@ -1,6 +1,6 @@
 # Local development
 
-The stack runs nginx, the frontend, the API, and the worker. The API and worker share one SQLite database on the `ataraxia-data` volume. The API serves the lessons API under `/api/v1`; the worker prepares requested lessons with a deterministic fake writer until the Claude CLI arrives in L04, and the reading-room frontend arrives in L05. The development override runs without sign-in (local mode), so no Firebase, GCP, or Claude configuration is needed.
+The stack runs nginx, the frontend, the API, and the worker. The API and worker share one SQLite database on the `ataraxia-data` volume. The API serves the lessons API under `/api/v1`; the worker writes lessons with the Claude Code CLI (or a deterministic fake writer), and the reading-room frontend arrives in L05. The development override runs without sign-in (local mode), so no Firebase or GCP configuration is needed. Lessons need the worker to be logged in to Claude once; see below.
 
 ## Start and stop
 
@@ -16,6 +16,20 @@ Open `http://localhost:8080`. Only nginx publishes a port, bound to `127.0.0.1`.
 curl -X POST -H 'Content-Type: application/json' -d '{"kind": "surprise"}' http://localhost:8080/api/v1/lessons/requests
 curl http://localhost:8080/api/v1/today
 ```
+
+### Log the worker in to Claude
+
+The worker image contains a pinned Claude Code CLI; the login is stored on the `claude-config` volume and survives rebuilds. Once, after the first start:
+
+```sh
+docker compose exec -it worker claude auth login
+```
+
+Open the printed URL in your browser, sign in with your Claude account, and paste the code back into the terminal. `docker compose exec worker claude auth status` shows the result. This login lasts about a month; the app warns before it ends. Alternatively run `claude setup-token` on your own computer (it prints a one-year token), put it in `.env` as `CLAUDE_CODE_OAUTH_TOKEN=…`, and recreate the worker with `docker compose up -d worker`.
+
+To try the app without Claude, start it with `ATARAXIA_GENERATOR=fake` to get sample lessons.
+
+### Local mode
 
 Local mode answers only requests addressed to `localhost`, `127.0.0.1`, or `[::1]` that no other proxy relayed (no Tailscale headers, one `X-Forwarded-For` entry from nginx); anything else gets 403. It relies on nginx listening on loopback, so never use it on a reachable host. The other services communicate through this project's private Compose network. Local HTTP is fine on your own machine; remote access is described in [deployment](deployment.md).
 
@@ -55,7 +69,9 @@ Copy the root `.env.example` to `.env` only if you need different defaults. Comp
 | `ATARAXIA_FIREBASE_PROJECT_ID`, `_API_KEY`, `_AUTH_DOMAIN`, `_APP_ID` | Firebase mode: the project and web app. The API verifies tokens against the project ID and serves all four to the browser through `/api/v1/client-config`; they are public by design. |
 | `ATARAXIA_DEFAULT_TIME_ZONE` | `UTC`. The owner's zone until it is set in Settings; any IANA name. |
 | `ATARAXIA_MAX_LESSONS_PER_DAY` | `8`. Daily cap on prepared lessons; see [lessons](lessons.md#requests-and-jobs). |
-| `ATARAXIA_GENERATOR` | `fake` (worker). Writes sample lessons without Claude; `claude` arrives in L04. |
+| `ATARAXIA_GENERATOR` | `claude` (worker). Writes lessons with the Claude Code CLI; `fake` writes sample lessons without Claude. |
+| `ATARAXIA_CLAUDE_MODEL` | `opus`. Any model name or alias the CLI accepts. |
+| `CLAUDE_CODE_OAUTH_TOKEN` | Optional one-year token from `claude setup-token`; without it the worker uses the login on the `claude-config` volume. Never use an API key: the worker strips them so lessons always use the subscription. |
 
 The Compose stack requires no host-installed Node, Python tooling, or credentials. The host Python 3 standard library is sufficient for `scripts/smoke.py`. For editor support or direct commands, backend tooling lives in `backend/pyproject.toml` and `backend/uv.lock`; frontend scripts live in `frontend/package.json` and `frontend/package-lock.json`.
 

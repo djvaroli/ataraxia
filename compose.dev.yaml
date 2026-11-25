@@ -18,10 +18,9 @@ services:
       - ./backend/src:/app/src:ro
   worker:
     build:
-      target: development
+      target: worker-development
     user: app
     environment:
       ATARAXIA_AUTH_MODE: local
-      ATARAXIA_GENERATOR: fake
     volumes:
       - ./backend/src:/app/src:ro
