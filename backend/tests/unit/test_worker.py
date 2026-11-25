@@ -1,28 +1,32 @@
-"""A worker reports stale or interrupted storage connectivity as unhealthy."""
+"""The worker reports stale or interrupted database contact as unhealthy."""
 
 import os
 import time
+from datetime import UTC, datetime
 from pathlib import Path
-from unittest.mock import AsyncMock
 
-from redis.asyncio import Redis
-from redis.exceptions import ConnectionError
-
-from ataraxia.worker.__main__ import probe_storage
+from ataraxia.adapters.sqlite.database import Database
+from ataraxia.adapters.sqlite.migrations import migrate
+from ataraxia.worker.__main__ import record_heartbeat
 from ataraxia.worker.healthcheck import MAX_AGE_SECONDS, is_healthy
 
+NOW = datetime(2026, 11, 24, 12, 0, tzinfo=UTC)
 
-async def test_heartbeat_recovers_after_storage_failure(tmp_path: Path) -> None:
+
+def test_heartbeat_recovers_after_storage_failure(tmp_path: Path) -> None:
     heartbeat = tmp_path / "heartbeat"
-    redis = AsyncMock(spec=Redis)
-    redis.ping = AsyncMock(side_effect=[True, ConnectionError(), True])
+    database = Database(tmp_path / "app.db")
+    migrate(database)
     assert not is_healthy(heartbeat)
-    assert await probe_storage(redis, heartbeat)
+    assert record_heartbeat(database, heartbeat, NOW)
     assert is_healthy(heartbeat)
-    assert not await probe_storage(redis, heartbeat)
+    with database.connect() as connection:
+        stored = connection.execute("SELECT heartbeat_at FROM worker_status").fetchone()
+    assert stored["heartbeat_at"] == NOW.isoformat()
+
+    database.path = tmp_path / "missing-directory" / "app.db"
+    assert not record_heartbeat(database, heartbeat, NOW)
     assert not is_healthy(heartbeat)
-    assert await probe_storage(redis, heartbeat)
-    assert is_healthy(heartbeat)
 
 
 def test_stale_heartbeat_is_unhealthy(tmp_path: Path) -> None:

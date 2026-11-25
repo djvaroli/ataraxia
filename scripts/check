@@ -7,7 +7,7 @@ trap '"${compose[@]}" down --volumes --remove-orphans' EXIT
 "${compose[@]}" run --build --rm --no-deps backend-check
 "${compose[@]}" run --build --rm --no-deps frontend-check
 
-# Check the committed contract without requiring Redis or a running API.
+# Check the committed contract without a database or a running API.
 task_schema=$("${compose[@]}" run --rm --no-deps backend-check python -m ataraxia.api.export_schema)
 diff -u frontend/openapi.json <(printf '%s\n' "$task_schema")
 "${compose[@]}" run --rm --no-deps frontend-check sh -ec \

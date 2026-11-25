@@ -1,6 +1,7 @@
 """Runtime configuration shared by the API and worker."""
 
-from pydantic import RedisDsn
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -9,4 +10,4 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_prefix="ATARAXIA_")
 
-    redis_url: RedisDsn = RedisDsn("redis://localhost:6379/0")
+    database_path: Path = Path("data/ataraxia.db")

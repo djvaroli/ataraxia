@@ -13,7 +13,9 @@ ENV PATH="/app/.venv/bin:$PATH"
 CMD ["uvicorn", "ataraxia.api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
 
 FROM base AS runtime
-RUN uv sync --locked --no-dev --no-editable && useradd --uid 10001 --create-home app
+RUN uv sync --locked --no-dev --no-editable \
+    && useradd --uid 10001 --create-home app \
+    && mkdir /data && chown app:app /data
 ENV PATH="/app/.venv/bin:$PATH"
 USER app
 CMD ["uvicorn", "ataraxia.api.main:app", "--host", "0.0.0.0", "--port", "8000"]

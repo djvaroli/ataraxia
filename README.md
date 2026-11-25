@@ -23,25 +23,25 @@ With Docker Engine and Docker Compose v2.20+ installed, run from this directory:
 docker compose -f compose.yaml -f compose.dev.yaml up --build --detach --wait
 ```
 
-Open [localhost:8080](http://localhost:8080). nginx is the only published service and binds to loopback. Source edits reload the frontend and API; restart the worker after editing it. No environment file or credentials are needed for this foundation. Copy `.env.example` to `.env` if you need to change the port.
+Open [localhost:8080](http://localhost:8080). nginx is the only published service and binds to loopback. Source edits reload the frontend and API; restart the worker after editing it. No environment file or credentials are needed yet. Copy `.env.example` to `.env` if you need to change the port.
 
 ```sh
 curl --fail http://localhost:8080/api/health/ready
 docker compose down
 ```
 
-Stopping the stack retains Redis data. See [Local development](docs/development.md) for compiled builds, logs, configuration, and storage details.
+Stopping the stack keeps the SQLite database on its volume. See [Local development](docs/development.md) for compiled builds, logs, configuration, and storage details.
 
 ## Validate
 
-These commands use the locked dependencies and pinned container runtimes. Checks do not require Firebase or an LLM provider:
+These commands use the locked dependencies and pinned container runtimes. Checks do not require Firebase or a Claude login:
 
 ```sh
 bash scripts/check
 python3 scripts/smoke.py
 ```
 
-The first runs formatting, lint, Python/TypeScript typechecks, tests, the frontend build, and generated API contract checks. The second checks real nginx routing, private service ports, Redis persistence, and failure recovery in its own disposable Compose project. Both remove only their temporary containers and volumes. CI runs the same commands.
+The first runs formatting, lint, Python/TypeScript typechecks, tests, the frontend build, and generated API contract checks. The second checks real nginx routing, private service ports, database persistence, and recovery in its own disposable Compose project. Both remove only their temporary containers and volumes. CI runs the same commands.
 
 ## Design documents
 
