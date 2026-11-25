@@ -2,7 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import type { LessonFilters, SubjectId } from '../lib/api';
-import { hasActiveWork } from '../lib/jobs';
+import { todayPollInterval } from '../lib/jobs';
 import { useServices } from './services';
 
 export const keys = {
@@ -26,12 +26,12 @@ export function useMe() {
 
 /** Today, refreshed every few seconds while something is being prepared and the tab is visible. */
 export function useToday() {
-  const { api, pollMs } = useServices();
+  const { api, pollMs, now } = useServices();
   return useQuery({
     queryKey: keys.today,
     queryFn: ({ signal }) => api.getToday(signal),
     refetchInterval: (query) =>
-      hasActiveWork(query.state.data) ? pollMs : false,
+      todayPollInterval(query.state.data, now(), pollMs),
     refetchIntervalInBackground: false,
   });
 }

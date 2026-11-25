@@ -7,14 +7,15 @@ import { useDocumentTitle } from '../../components/useDocumentTitle';
 import ui from '../../components/ui.module.css';
 import type { Today } from '../../lib/api';
 import { formatDay } from '../../lib/format';
-import { isActive, requestBlock } from '../../lib/jobs';
+import { isActive, needsClaudeLogin, requestBlock } from '../../lib/jobs';
+import { ClaudeLoginNotice } from './ClaudeLoginNotice';
 import { AnotherLesson } from './AnotherLesson';
 import { DailyLesson } from './DailyLesson';
 import { JobList } from './JobList';
 import { Masthead } from './Masthead';
 import styles from './today.module.css';
 
-const LOGIN_WARNING_DAYS = 7;
+const LOGIN_WARNING_DAYS = 5;
 const RECENT = { limit: 10 } as const;
 
 export function TodayPage() {
@@ -60,6 +61,7 @@ export function TodayPage() {
         localDate={data.local_date}
         issue={progress.data?.lessons_total ?? null}
       />
+      {needsClaudeLogin(data) && <ClaudeLoginNotice />}
       <Notices today={data} timeZone={timeZone} now={current} />
       <DailyLesson
         slot={data.daily}
@@ -152,7 +154,8 @@ function Notices({
       'The lesson worker isn’t running, so nothing new will be prepared until it starts again.',
     );
   }
-  if (worker.login_expires_at) {
+  // The sign-in notice already covers a login that has ended.
+  if (worker.login_expires_at && !needsClaudeLogin(today)) {
     const ends = new Date(worker.login_expires_at);
     const days = (ends.getTime() - now.getTime()) / 86_400_000;
     if (days <= 0) {

@@ -5,7 +5,7 @@
  * report is harmless.
  */
 import { type RefObject, useEffect, useState } from 'react';
-import type { ReadingReport } from '../../lib/api';
+import { ApiError, type ReadingReport } from '../../lib/api';
 
 export const REPORT_INTERVAL_MS = 30_000;
 const MAX_SECONDS = 14_400;
@@ -71,7 +71,7 @@ export function useReadingReports(
   send: (report: ReadingReport) => Promise<void>,
 ): void {
   useEffect(() => {
-    const sessionId = newSessionId();
+    let sessionId = newSessionId();
     let seconds = 0;
     let visibleSince: number | null =
       document.visibilityState === 'visible' ? Date.now() : null;
@@ -91,8 +91,14 @@ export function useReadingReports(
         return;
       }
       last = current;
-      send({ session_id: sessionId, ...current }).catch(() => {
-        // A lost report costs at most one interval; the next one repeats the totals.
+      send({ session_id: sessionId, ...current }).catch((error: unknown) => {
+        // 409: this ID is already used for another lesson. Start a new session
+        // and send the totals again with the next report.
+        if (error instanceof ApiError && error.status === 409) {
+          sessionId = newSessionId();
+          last = { seconds: 0, scroll: 0 };
+        }
+        // Otherwise a lost report costs at most one interval; the next repeats the totals.
       });
     };
 

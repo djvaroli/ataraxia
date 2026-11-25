@@ -14,15 +14,11 @@ interface PlateProps {
 export function Plate({ illustration, eager = false, className }: PlateProps) {
   const [failed, setFailed] = useState(false);
   if (failed || !isAllowedImage(illustration.image_url)) return null;
-  const ratio =
-    illustration.width && illustration.height
-      ? `${illustration.width} / ${illustration.height}`
-      : undefined;
   return (
     <figure
       className={className ? `${styles.plate} ${className}` : styles.plate}
     >
-      <div className={styles.frame} style={{ aspectRatio: ratio }}>
+      <div className={styles.frame}>
         <img
           src={illustration.image_url}
           alt={illustration.caption}

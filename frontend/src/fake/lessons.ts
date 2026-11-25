@@ -79,6 +79,16 @@ const ROSETTA: Illustration = {
   height: 1124,
 };
 
+// A small image, as Wikipedia returns for some posters: must not be scaled up.
+const TOKYO_STORY_POSTER: Illustration = {
+  image_url: `${thumbs}/8/86/Tokyo_monogatari_poster.jpg/250px-Tokyo_monogatari_poster.jpg`,
+  page_url: 'https://en.wikipedia.org/wiki/Tokyo_Story',
+  title: 'Tokyo Story',
+  caption: 'Japanese poster for Tokyo Story, 1953.',
+  width: 250,
+  height: 358,
+};
+
 const HASH_DIAGRAM: Illustration = {
   image_url: `${commons}/7/7d/Hash_table_3_1_1_0_1_0_0_SP.svg/960px-Hash_table_3_1_1_0_1_0_0_SP.svg.png`,
   page_url: 'https://en.wikipedia.org/wiki/Hash_table',
@@ -707,7 +717,7 @@ export const SAMPLE_LESSONS: SampleLesson[] = [
     glossary: [],
     goDeeper: SHARED_DIRECTIONS,
     further: [{ title: 'Tokyo Story', creator: 'Yasujirō Ozu', kind: 'film' }],
-    illustrations: [],
+    illustrations: [TOKYO_STORY_POSTER],
     opened: true,
     finished: true,
     saved: true,

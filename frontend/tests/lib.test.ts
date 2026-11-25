@@ -1,7 +1,12 @@
 import { describe, expect, test } from 'vitest';
 import type { Allowance, Job, Today } from '../src/lib/api';
 import { formatDateline, formatHour, formatMonth } from '../src/lib/format';
-import { deferredUntil, hasActiveWork, requestBlock } from '../src/lib/jobs';
+import {
+  deferredUntil,
+  hasActiveWork,
+  requestBlock,
+  todayPollInterval,
+} from '../src/lib/jobs';
 import {
   isAllowedImage,
   isWikipediaPage,
@@ -109,4 +114,27 @@ describe('jobs', () => {
 
 test('session IDs are UUIDs the API accepts', () => {
   expect(newSessionId()).toMatch(/^[0-9a-f-]{36}$/);
+});
+
+describe('Today polling interval', () => {
+  const now = new Date('2026-11-24T10:00:00Z');
+  const job = (fields: Partial<Job>) =>
+    ({ status: 'queued', next_attempt_at: null, ...fields }) as Job;
+  const today = (jobs: Job[]) =>
+    ({ daily: { status: 'ready', job: null }, jobs }) as unknown as Today;
+
+  test('polls quickly while a job can finish soon', () => {
+    expect(
+      todayPollInterval(today([job({ status: 'running' })]), now, 4000),
+    ).toBe(4000);
+  });
+
+  test('polls once a minute while every waiting job is deferred', () => {
+    const deferred = job({ next_attempt_at: '2026-11-24T10:25:00Z' });
+    expect(todayPollInterval(today([deferred]), now, 4000)).toBe(60_000);
+  });
+
+  test('stops when nothing is waiting', () => {
+    expect(todayPollInterval(today([]), now, 4000)).toBe(false);
+  });
 });

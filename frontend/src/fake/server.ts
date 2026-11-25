@@ -211,6 +211,7 @@ export class FakeServer {
       online: true,
       heartbeat_at: this.now().toISOString(),
       login_expires_at: null,
+      claude_logged_in: true,
     };
     for (const sample of SAMPLE_LESSONS) this.addSample(sample);
     this.applyScenario(options.scenario ?? 'ready');
@@ -391,8 +392,9 @@ export class FakeServer {
         this.failJob(
           job.id,
           'claude_auth',
-          'Claude is not signed in on the server.',
+          'Claude is not signed in on the server, so the lesson could not be written.',
         );
+        this.worker.claude_logged_in = false;
         break;
       }
       case 'waiting':

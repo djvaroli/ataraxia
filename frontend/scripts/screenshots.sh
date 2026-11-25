@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Screenshot every screen of the demo build in light and dark, at phone and desktop width.
-# Usage: bash frontend/scripts/screenshots.sh <out-dir> [name-filter]
+# Usage: bash frontend/scripts/screenshots.sh <out-dir> [comma-separated name filters]
 # Needs Docker; uses node:24.21.0-bookworm-slim and the Playwright image.
 set -euo pipefail
 out=$(cd "${1:?out dir}" && pwd)

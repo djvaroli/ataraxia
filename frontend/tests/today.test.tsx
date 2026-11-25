@@ -61,6 +61,35 @@ describe('Today', () => {
     expect(await screen.findByText('Preparing…')).toBeVisible();
   });
 
+  test('explains how to sign Claude in when the worker is not signed in', async () => {
+    const { user } = renderApp({ scenario: 'failed' });
+
+    const notice = await screen.findByRole('region', {
+      name: 'Lessons can’t be prepared right now',
+    });
+    expect(
+      within(notice).getByText(
+        'docker compose exec -it worker claude auth login',
+      ),
+    ).toBeVisible();
+    await user.click(within(notice).getByRole('button', { name: 'Copy' }));
+    // user-event provides the clipboard in tests.
+    expect(await navigator.clipboard.readText()).toBe(
+      'docker compose exec -it worker claude auth login',
+    );
+    expect(
+      within(notice).getByRole('button', { name: 'Copied' }),
+    ).toBeVisible();
+  });
+
+  test('shows no sign-in notice while Claude is signed in', async () => {
+    renderApp({ scenario: 'ready' });
+    await screen.findByText('Another lesson');
+    expect(
+      screen.queryByText(/Lessons can’t be prepared/),
+    ).not.toBeInTheDocument();
+  });
+
   test('polls while a lesson is being prepared and stops when it is ready', async () => {
     vi.useFakeTimers({
       toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval'],
@@ -157,6 +186,7 @@ describe('Today', () => {
       online: false,
       heartbeat_at: null,
       login_expires_at: null,
+      claude_logged_in: null,
     };
     renderApp({ server });
     expect(

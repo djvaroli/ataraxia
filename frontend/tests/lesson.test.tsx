@@ -4,6 +4,7 @@ import { describe, expect, test, vi } from 'vitest';
 import { createFakeAuth } from '../src/fake/auth';
 import { FakeServer } from '../src/fake/server';
 import { useReadingReports } from '../src/features/lesson/useReading';
+import { ApiError } from '../src/lib/api';
 import { NOW, bodies, renderApp } from './render';
 
 function serverWith(extraMarkdown = '') {
@@ -65,6 +66,13 @@ describe('Lesson reader', () => {
     const pre = container.querySelector('pre');
     expect(pre).toHaveAttribute('tabindex', '0');
     expect(pre?.querySelector('code')).toHaveTextContent('class HashTable:');
+  });
+
+  test('never scales a small illustration past its natural width', async () => {
+    const { container } = await openLesson('l-ozu');
+    const poster = container.querySelector('img');
+    expect(poster).toHaveAttribute('width', '250');
+    expect(poster?.src).toMatch(/^https:\/\/thumb\.wikimedia\.org\//);
   });
 
   test('builds illustration and further links only from trusted sources', async () => {
@@ -246,6 +254,30 @@ describe('Reading reports', () => {
     expect(send).toHaveBeenLastCalledWith(
       expect.objectContaining({ session_id: first.session_id, seconds: 45 }),
     );
+  });
+
+  test('starts a new session when the server says the ID belongs to another lesson', async () => {
+    vi.useFakeTimers();
+    setVisibility('visible');
+    const conflict = new ApiError(
+      409,
+      'conflict',
+      'Session used for another lesson.',
+    );
+    const send = vi
+      .fn<(report: { session_id: string; seconds: number }) => Promise<void>>()
+      .mockRejectedValueOnce(conflict)
+      .mockResolvedValue(undefined);
+    renderHook(() => {
+      const ref = useRef<HTMLDivElement>(document.createElement('div'));
+      useReadingReports('l-1', ref, send);
+    });
+
+    await act(() => vi.advanceTimersByTimeAsync(30_000));
+    await act(() => vi.advanceTimersByTimeAsync(30_000));
+    const [first, second] = send.mock.calls.map(([report]) => report);
+    expect(second.session_id).not.toBe(first.session_id);
+    expect(second.seconds).toBe(60);
   });
 
   test('sends reading reports with keepalive and the bearer token', async () => {

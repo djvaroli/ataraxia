@@ -6,6 +6,27 @@ export function isActive(job: Pick<Job, 'status'>): boolean {
   return job.status === 'queued' || job.status === 'running';
 }
 
+/** How long to wait while the only waiting jobs are deferred (e.g. after a usage limit). */
+export const DEFERRED_POLL_MS = 60_000;
+
+/**
+ * How often Today should refresh: `pollMs` while a job may finish soon, once a
+ * minute while every waiting job is deferred to a later attempt, never otherwise.
+ */
+export function todayPollInterval(
+  today: Today | undefined,
+  now: Date,
+  pollMs: number,
+): number | false {
+  if (!today || !hasActiveWork(today)) return false;
+  const active = [today.daily.job, ...today.jobs].filter(
+    (job): job is Job => job !== null && isActive(job),
+  );
+  const allDeferred =
+    active.length > 0 && active.every((job) => deferredUntil(job, now));
+  return allDeferred ? DEFERRED_POLL_MS : pollMs;
+}
+
 /** True while Today has anything that will change without the reader acting. */
 export function hasActiveWork(today: Today | undefined): boolean {
   if (!today) return false;
@@ -37,10 +58,24 @@ export function failureReason(job: Job): string {
 /** What the owner can do about a failure, when there is something specific. */
 export function failureHint(job: Job): string | null {
   if (job.error_code === 'claude_auth') {
-    return 'Sign Claude in on the server (docker compose exec -it worker claude auth login), then retry.';
+    return 'Sign Claude in on the server (see the note above), then retry.';
   }
   if (job.error_code === 'daily_limit') return 'More lessons tomorrow.';
   return null;
+}
+
+/** The command that signs the worker's Claude CLI in. */
+export const CLAUDE_LOGIN_COMMAND =
+  'docker compose exec -it worker claude auth login';
+
+/** Whether Today should explain how to sign Claude in on the server. */
+export function needsClaudeLogin(today: Today): boolean {
+  if (today.worker.claude_logged_in === false) return true;
+  if (today.worker.claude_logged_in === true) return false;
+  const jobs = today.daily.job ? [today.daily.job, ...today.jobs] : today.jobs;
+  return jobs.some(
+    (job) => job.status === 'failed' && job.error_code === 'claude_auth',
+  );
 }
 
 /** A queued job that is waiting until a later time, e.g. after a usage limit. */

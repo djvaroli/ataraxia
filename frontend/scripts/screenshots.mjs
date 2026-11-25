@@ -1,5 +1,5 @@
 // Screenshots of the demo build for design review. Run through scripts/screenshots.sh.
-// Usage: node screenshots.mjs <base-url> <out-dir> [name-filter]
+// Usage: node screenshots.mjs <base-url> <out-dir> [comma-separated name filters]
 import { chromium } from 'playwright';
 
 const [base, out, filter = ''] = process.argv.slice(2);
@@ -31,6 +31,7 @@ const shots = [
     path: '/lessons/l-vermeer',
     click: ['button[aria-label="More"]'],
   },
+  { name: 'reader-poster', path: '/lessons/l-ozu', full: true },
   { name: 'library', path: '/library', full: true },
   { name: 'progress', path: '/progress', full: true },
   { name: 'settings', path: '/settings', full: true },
@@ -42,7 +43,10 @@ const shots = [
 const browser = await chromium.launch();
 for (const scheme of ['light', 'dark']) {
   for (const shot of shots) {
-    if (filter && !shot.name.includes(filter)) continue;
+    const wanted = filter.split(',').filter(Boolean);
+    if (wanted.length && !wanted.some((part) => shot.name.includes(part))) {
+      continue;
+    }
     const context = await browser.newContext({
       viewport: shot.viewport ?? phone,
       deviceScaleFactor: shot.viewport ? 1 : 2,
