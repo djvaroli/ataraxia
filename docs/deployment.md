@@ -6,8 +6,9 @@ runbook is completed when L06 is implemented. Nothing here is provisioned yet.
 
 ## Shape
 
-- One small Linux VM (Ubuntu 24.04 LTS, 1–2 GB RAM) running Docker Engine and the
-  Compose stack from this repository.
+- One small Linux VM (Ubuntu 24.04 LTS, 2 GB RAM, or 1 GB with swap) running Docker
+  Engine and the Compose stack from this repository. Image builds and the Claude CLI
+  need the headroom.
 - **No public inbound ports.** The VM joins the owner's Tailscale network, which
   needs no open ports. The phone uses the Tailscale app.
 - `tailscale serve` provides HTTPS at `https://<machine>.<tailnet>.ts.net` with a
@@ -51,13 +52,15 @@ is not the default.
 | `CLAUDE_CODE_OAUTH_TOKEN` | Optional; see [logging in](lessons.md#logging-in) |
 
 Start with `docker compose up --build --detach --wait`, then log the worker in to
-Claude.
+Claude. Never add `compose.dev.yaml` on the VM: it switches to local mode without
+sign-in (the API refuses forwarded requests in that mode, but do not rely on it).
 
 ## Backups
 
-Required before trusting the app with months of history. A small command
-(`python -m ataraxia.tools backup`) uses SQLite's online backup to write a consistent
-copy, which a daily timer then sends off the VM: to a private cloud bucket with a
+Required before trusting the app with months of history. The backup command from
+L03 (`python -m ataraxia.tools backup`) uses SQLite's online backup to write a
+consistent copy; the same file moves local history to the VM. A daily timer then
+sends a copy off the VM: to a private cloud bucket with a
 dedicated write-only credential, or over Tailscale to another of the owner's machines.
 Keep 30 days. A restore drill (copy into an empty volume, start the stack, compare
 lesson and event counts) must pass once before regular use.

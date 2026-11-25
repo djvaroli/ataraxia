@@ -26,8 +26,9 @@ The worker is one process running a simple loop every few seconds:
    left, otherwise mark them `failed` with `interrupted`.
 2. If the morning lesson is enabled, the local hour has passed, and today has no daily
    job, insert one. Days when the host was off are not caught up.
-3. Take the oldest queued job whose next attempt time has passed. Check the daily cap,
-   insert a `generation_calls` row, and only then call Claude.
+3. Take the oldest queued job whose next attempt time has passed. Check the daily cap
+   (today's calls, not counting ones refused for login or usage limits), insert a
+   `generation_calls` row, and only then call Claude.
 4. Validate the result, look up illustrations, and publish the lesson, its state row,
    the job result, and a `lesson.prepared` event in one transaction.
 5. Write a heartbeat to `worker_status` every loop.
@@ -42,16 +43,16 @@ A job gets at most two attempts. The error code decides what happens next:
 | Code | Meaning | Next |
 | --- | --- | --- |
 | `claude_auth` | The CLI is not logged in or the login expired | Fail now; the UI shows the login command |
-| `claude_usage_limit` | The subscription's session or weekly limit | Fail now; retry after the reset |
+| `claude_usage_limit` | The subscription's session or weekly limit | Stay queued without using an attempt; try again every 30 minutes; fail 24 hours after the request |
 | `claude_timeout` | No result within `ATARAXIA_CLAUDE_TIMEOUT_SECONDS` (default 600) | Retry once after 30 seconds |
 | `invalid_output` | No structured output, or it failed validation | Retry once |
 | `claude_error` | Any other CLI failure | Retry once after 30 seconds |
 | `daily_limit` | The cap was reached before the call | Fail; no call made |
 | `interrupted` | Worker stopped during the last attempt | See step 1 |
 
-Errors are classified from the CLI's JSON result: `is_error`, `api_error_status`, and
-the documented messages ("Not logged in", "Login expired", "Failed to authenticate",
-"hit your session limit", "hit your weekly limit"). A failed job can be retried from
+Errors are classified from the CLI's JSON result: `is_error`, `api_error_status`
+(401/403 for login, 429 for limits), and loose matches on the documented messages
+("Not logged in", "Login expired", "Failed to authenticate", "hit your … limit"). A failed job can be retried from
 the UI; a retry gives it two new attempts, and every call still counts toward the
 daily cap.
 
@@ -123,7 +124,7 @@ The schema Claude must satisfy (limits enforced again after the call):
 | `title` | 3–120 characters |
 | `hook` | 20–320 characters, one or two sentences |
 | `reading_minutes` | 2–30, Claude's estimate at about 230 words a minute |
-| `body_markdown` | 600–24,000 characters; `##`/`###` headings, lists, tables, block quotes, inline and display math (`$…$`, `$$…$$`), fenced code; no HTML, images, or links |
+| `body_markdown` | 600–40,000 characters; `##`/`###` headings, lists, tables, block quotes, inline and display math (`$…$`, `$$…$$`), fenced code; no HTML, images, or links |
 | `key_ideas` | 3–5 items, each up to 240 characters |
 | `glossary` | 0–12 terms with definitions up to 300 characters |
 | `go_deeper` | Exactly 3, each a title (up to 80) and a one-sentence description (up to 240) |
@@ -131,8 +132,8 @@ The schema Claude must satisfy (limits enforced again after the call):
 | `illustrations` | 0–3 English Wikipedia article titles with a caption, only where an image helps |
 | `tags` | 1–6 short tags |
 
-Length targets by setting: short about 900–1,200 words, standard about 1,800–2,800,
-long about 3,500–4,500.
+Length targets by setting, at about 230 words a minute: short 1,000–1,300 words
+(about 5 minutes), standard 2,300–3,200 (10–15 minutes), long 4,000–5,000 (about 20).
 
 The system prompt asks for writing for one curious, intelligent adult who is not a
 specialist: a concrete opening rather than a definition, a clear line of argument,
@@ -147,8 +148,10 @@ Science says what kind of evidence supports a claim.
 ### Illustrations
 
 For each requested title the worker asks Wikipedia's Action API (`action=query`,
-`prop=pageimages|info`, `redirects=1`, thumbnail width 1280) over HTTPS with a
-descriptive User-Agent, a 5-second timeout, and a small response limit. Only image
+`prop=pageimages|info`, `pilicense=any`, `redirects=1`, thumbnail width 1280) over
+HTTPS with a descriptive User-Agent, a 5-second timeout, and a small response limit.
+`pilicense=any` includes the non-free lead images Wikipedia itself shows (film
+posters, modern artworks); this private app displays them the same way. Only image
 URLs on `upload.wikimedia.org` are kept, with the article's canonical URL as the
 source link. Titles that do not resolve are dropped; a lesson without images is fine.
 Wikipedia lookups never delay publication by more than about 15 seconds in total.
@@ -164,15 +167,21 @@ Server-side changes write their event in the same transaction as the change.
 | `lesson.prepared` | A lesson is published | job kind, model, reading minutes |
 | `lesson.failed` | A job fails for good | error code |
 | `lesson.opened` | The reader is opened | — |
-| `lesson.read` | The reader is left or hidden | seconds (capped at 1,800 per report), furthest scroll 0–1 |
 | `lesson.finished` / `lesson.unfinished` | Finished is set or cleared | — |
 | `lesson.saved` / `lesson.unsaved` | Saved is set or cleared | — |
 | `lesson.rated` | Rating changes | rating −1, 0, or 1 |
 | `lesson.flagged` | A problem is reported | note (up to 500 characters) |
 | `settings.updated` | Settings change | changed field names and new values |
 
-Repeating a state change with the same value writes no event. Reading reports are
-summed into `lesson_state.read_seconds`; the furthest scroll keeps its maximum.
+Repeating a state change with the same value writes no event.
+
+Reading time is recorded as sessions rather than events. Opening the reader starts a
+session with a random ID; while the page is visible the client sends the session's
+cumulative seconds and furthest scroll every 30 seconds, and again when the page is
+hidden. The server upserts the `reading_sessions` row (lesson, session ID, start time,
+local date, seconds, furthest scroll), keeping the larger values, so a repeated, late,
+or lost report costs at most 30 seconds and never double-counts.
+`lesson_state.read_seconds` is the sum of a lesson's sessions.
 
 ## Using the record later
 
@@ -182,5 +191,9 @@ summed into `lesson_state.read_seconds`; the furthest scroll keeps its maximum.
   and recent days.
 - The SQLite file can be queried directly with
   `docker compose exec api python -m sqlite3 /data/ataraxia.db`.
+- `docker compose exec api python -m ataraxia.tools backup /data/backups/<name>.db`
+  writes a consistent copy with SQLite's online backup.
 
-These are the inputs for recaps, tuning subject weights or prompts, and quizzes.
+This is how a Claude session reads the data: in a terminal on the machine running
+the app (over SSH for the VM), not through the browser-authenticated API. These are
+the inputs for recaps, tuning subject weights or prompts, and quizzes.

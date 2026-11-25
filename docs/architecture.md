@@ -109,9 +109,10 @@ UUIDs. There is no owner column: the database belongs to the one owner.
 | `lessons` | Immutable content: ID, created time, local date, subject, origin (daily, surprise, subject, topic, follow-up), request text, parent and thread root IDs, title, hook, reading minutes, Markdown body, structured extras (key ideas, glossary, go-deeper, further, tags), illustrations, model, prompt version |
 | `lesson_state` | Mutable per lesson: saved (and when), rating −1/0/1 (and when), first opened, finished, total reading seconds, furthest scroll, flagged note |
 | `generation_jobs` | Requested work: kind, local date, subject, topic or question, parent lesson, status (queued, running, succeeded, failed), attempts, error code, resulting lesson, timestamps. One daily job per date (unique index). |
-| `generation_calls` | One row per Claude call, inserted before the call: job, local date, duration, outcome, model, reported tokens and cost. Counting today's rows enforces the daily cap. |
+| `generation_calls` | One row per Claude call, inserted before the call: job, local date, duration, outcome, model, reported tokens and cost. Today's rows, minus calls refused for login or usage limits, enforce the daily cap. |
+| `reading_sessions` | One row per reader visit: lesson, client session ID, start time, local date, cumulative seconds, furthest scroll; upserted by periodic reports |
 | `activity_events` | Append-only: sequence ID, UTC time, local date, type, lesson ID, subject, small JSON payload |
-| `worker_status` | Single row: last heartbeat, last error code, so the API can say whether lessons can be prepared |
+| `worker_status` | Single row: last heartbeat, last error code, Claude login expiry, so the API can say whether lessons can be prepared |
 
 Lesson content never changes after it is stored; saving, rating, reading, and
 finishing change `lesson_state` and append events. Publishing a prepared lesson
@@ -136,7 +137,7 @@ and return only a status. `GET` requests never start lesson preparation.
 | `GET /lessons` | Summaries, newest first, cursor-paginated; filters: saved, subject, text |
 | `GET /lessons/{id}` | Full lesson, state, and thread |
 | `PUT /lessons/{id}/saved`, `/rating`, `/finished`, `/flag` | Set state idempotently; each change appends an event |
-| `POST /lessons/{id}/opened`, `/reading` | Record an open and a bounded reading interval |
+| `POST /lessons/{id}/opened`, `/reading` | Record an open; upsert a reading session's cumulative time and scroll |
 | `POST /activity` | Client events from a short allowlist (app opened) |
 | `GET /progress` | Streaks, totals, per-subject breakdown, recent days |
 | `GET /activity` | Raw events, cursor-paginated, for analysis |
@@ -165,8 +166,11 @@ Firebase web configuration comes from environment variables at runtime through
 
 **local.** No sign-in; every request is the owner. It exists so the app can be tried
 before a Firebase project exists. The API logs a warning at startup and the UI shows
-that it is in local mode. It is acceptable only while nginx is bound to loopback on
-the owner's own machine.
+that it is in local mode. It accepts only requests whose `Host` is `localhost` or
+`127.0.0.1` (any port) and that carry no Tailscale identity headers, so a request
+forwarded from another machine (for example by `tailscale serve`) or a DNS-rebinding
+page is refused with 403. Only the development override selects it; never use that
+override on the VM.
 
 The owner creates the Firebase project and account by hand, enables only the
 email/password provider, and turns off sign-up under Authentication → Settings →

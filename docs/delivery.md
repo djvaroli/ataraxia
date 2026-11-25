@@ -21,13 +21,14 @@ startup under a lock, and the app refuses a newer schema. Readiness checks a bou
 query; the worker heartbeat reflects database contact. The smoke check proves the
 database survives container recreation and that only nginx publishes a port.
 
-### L03 Owner identity, settings, lessons API, activity
+### L03 Owner identity, settings, lessons API, activity, worker loop
 
 - `firebase` mode: missing/invalid/expired tokens get 401, a valid non-owner token 403,
   and missing configuration stops the API. Verified with locally signed test tokens
   and a fake key source; no network in unit tests.
 - `local` mode works only when set explicitly; the runtime Compose file defaults to
-  `firebase`.
+  `firebase`. It refuses requests with a non-loopback `Host` or Tailscale identity
+  headers.
 - Settings validate the time zone (IANA), subjects (catalog IDs), length, and hour.
 - Lesson requests and follow-ups create jobs and enforce the daily cap and waiting
   limit; the daily ensure is idempotent.
@@ -37,9 +38,12 @@ database survives container recreation and that only nginx publishes a port.
   and search work.
 - Progress returns correct streaks across time-zone day boundaries, totals, and the
   per-subject breakdown.
-- Export contains every durable table; `python -m ataraxia.tools export` and `stats`
-  work with `--help` and useful exit codes.
-- With the fake generator selected, a requested lesson goes from queued to ready.
+- Reading reports upsert sessions idempotently; repeated reports never double-count.
+- Export contains every durable table; `python -m ataraxia.tools export`, `stats`, and
+  `backup` work with `--help` and useful exit codes.
+- The worker loop (recovery, morning scheduling, daily cap, attempts, usage-limit
+  waiting, atomic publication, heartbeat) runs with the deterministic fake generator,
+  so a requested lesson goes from queued to ready without Claude.
 
 ### L04 Claude CLI lesson generation
 
@@ -47,13 +51,12 @@ database survives container recreation and that only nginx publishes a port.
   contain it; only the worker mounts the login volume.
 - The subprocess gets the documented flags, an empty working directory, an explicit
   environment without API-key variables, and a hard timeout.
-- Errors map to the codes in [lessons](lessons.md#attempts-and-errors); attempts and
-  the daily cap survive restarts; interrupted jobs recover.
-- The morning lesson is created once per local day after the configured hour.
-- Validation rejects out-of-range output; illustrations keep only
-  `upload.wikimedia.org` images and never block publication.
-- Unit tests use a fake CLI runner and fake Wikipedia client. A manual check generates
-  a real lesson with the owner's login before merge and records the result.
+- CLI results map to the error codes in [lessons](lessons.md#attempts-and-errors).
+- The prompt includes the subject guidance, length target, recent titles, and taste
+  hints; validation rejects out-of-range output.
+- Illustrations keep only `upload.wikimedia.org` images and never block publication.
+- Unit tests use a fake CLI runner and fake Wikipedia client. Real lessons are
+  generated through the CLI with the owner's subscription and inspected before merge.
 
 ### L05 Reading-room frontend
 

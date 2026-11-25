@@ -11,7 +11,7 @@ pass (authorized by the owner on 24 November 2026). This is the delivery policy;
    an existing stack before starting another. Use a separate worktree for unrelated work.
 2. Choose one authorized roadmap increment. Prefer a native GitHub stack of small,
    coherent, runnable PRs for dependent changes or an increment that benefits from separate
-   reviews. Keep a small self-contained change in one PR. Use `codex/` branches;
+   reviews. Keep a small self-contained change in one PR. Use `claude/` branches;
    the first PR targets the integration branch (normally `main`), and each dependent
    PR targets its actual parent branch. Record parent links and bottom-to-top order
    in PR descriptions and the handoff. Begin with one active stack.
@@ -105,9 +105,9 @@ by [Codex](https://developers.openai.com/codex/skills),
 First validate this loop on a real increment. Then a local scheduled run can read
 the same roadmap and resume the open stack, or take the next explicitly enabled
 item. It must reconcile current remote state, avoid duplicate PRs/issues, use an
-isolated worktree, and stop at a finished stack or a concrete blocker. Notify only
-for a new ready stack, meaningful failure, or needed decision; stay quiet while
-waiting for the same unmerged stack. Never deploy or provision resources.
+isolated worktree, and stop at a merged increment or a concrete blocker. Notify only
+for newly merged work, meaningful failure, or needed decision; stay quiet when
+there is nothing new. Never deploy or provision resources.
 
 Choose cadence, allowed roadmap scope, and a run budget before enabling recurrence.
 Local scheduled tasks need the computer and app running, plus working GitHub and

@@ -36,7 +36,7 @@ A lesson is written by Claude for this reader. It has:
 | Part | Content |
 | --- | --- |
 | Header | Subject, title, a one- or two-sentence hook, estimated reading minutes |
-| Body | About 1,800–2,800 words of Markdown with section headings; formulas for mathematics, short code blocks for computer science |
+| Body | About 2,300–3,200 words of Markdown at the standard length, with section headings; formulas for mathematics, short code blocks for computer science |
 | Illustrations | Up to three images from Wikipedia for subjects where pictures matter (artworks, places, films, people), each with a caption and source link |
 | What to remember | Three to five key ideas |
 | Glossary | Terms worth keeping, with short definitions (the main content in Words lessons) |
@@ -88,8 +88,8 @@ Every meaningful action is stored as a timestamped event with the owner's local 
 The record is append-only and never expires. It is available through the API, a
 JSON export, and a command-line tool, so a later Claude session can pull it to tune
 subject weights and prompts, write weekly or monthly recaps, or point out patterns
-in what the owner reads. Events contain lesson IDs and subjects, not free-form
-personal notes, apart from the owner's own topic requests and questions.
+in what the owner reads. Events contain lesson IDs and subjects; the only free text
+is the owner's own topic requests, questions, and notes on flagged lessons.
 
 ## Screens
 
@@ -157,9 +157,11 @@ be added to the phone's home screen; offline reading is deferred.
 - A daily cap on prepared lessons (default 8) protects the owner's Claude usage. The
   morning lesson counts toward it. Reaching it disables new requests until tomorrow.
 - At most three lessons can be waiting at once.
+- If Claude's usage limit is reached, the lesson waits and tries again on its own
+  every half hour, and the card says so.
 - If preparation fails, the lesson card says why in plain words (Claude is not signed
-  in on the server, usage limit reached, or a generation problem) and offers a retry
-  when one is allowed. Other lessons and the Library keep working.
+  in on the server, or a generation problem) and offers a retry. Other lessons and
+  the Library keep working.
 - A lesson, once prepared, does not change. There is no "reroll"; ask for another.
 
 ## Later
