@@ -1,142 +1,177 @@
 # Ataraxia product and experience
 
-Ataraxia should make recording a habit take a few seconds and give its owner a reason to return that feels rewarding. A short daily reading ritual broadens vocabulary and understanding of art, history, the mind, and machine learning. The app is for one person's use, with durable personal history and a calm mobile interface.
+Ataraxia gives its owner one good lesson a day: a 10–15 minute read on art, history,
+film, words, geography and geopolitics, science, mathematics, computer science, or
+another subject worth knowing. A lesson can be saved, rated, and continued into a
+deeper follow-up. Everything the owner does is recorded so that the history can be
+reviewed later, by the owner or by Claude, to tune the lessons, write recaps, and
+eventually build quizzes.
+
+The app is for one person on a phone. It should feel like a quiet, well-made
+reading room rather than a feed. The working name comes from the repository and can
+change.
+
+Habit tracking, the earlier first priority, is deferred until the learning loop is
+in daily use; see [Later](#later).
 
 ## The daily loop
 
-1. Open Today and see the habits scheduled for the current day.
-2. Tap a habit's circle to record completion; undo immediately if needed.
-3. See progress for the day and week without having to open an analytics screen.
-4. Browse the five discoveries when convenient. Reading is optional and creates no overdue tasks.
-5. Revisit the calendar or Library to notice progress and recall something learned.
+1. Open Today. The day's lesson is ready, prepared early in the morning in the
+   owner's time zone, or can be started on request.
+2. Read it. Reading time and progress are recorded; there is no quiz or obligation.
+3. At the end, mark it finished, rate it ("More like this" / "Less like this"), and
+   save it if it is worth keeping.
+4. To go further, choose one of the suggested follow-up directions or ask a question
+   of your own. The follow-up becomes the next part of the same thread.
+5. Any time: ask for another lesson ("Surprise me", a chosen subject, or a specific
+   topic), browse the Library, or look at Progress to see what has been covered.
 
-The first useful release includes all five discovery categories. Implementation starts with habits so that content generation never becomes a dependency of habit tracking.
+Unread lessons never pile up as overdue work. Missing a day costs nothing except a
+streak count.
 
-## Initial scope
+## Lessons
 
-| Area | Included in the first useful release | Later possibilities |
-| --- | --- | --- |
-| Habits | Binary completion, daily or selected weekdays, create/edit/archive, calendar, backfill, undo, weekly consistency | Flexible N-times-per-week targets, quantities, timers, reminders, pause periods |
-| Motivation | Clear progress, personal milestones, optional streak display, small completion animation | Points, levels, challenges, a small growing garden |
-| Discoveries | One word, artwork, historical event, mind insight, and ML paper per local day | Topic preferences, more sources, occasional extra discoveries |
-| Library | Automatic history, category/date filters, text search, favorites, read/unread state | Notes, collections, active recall, spaced repetition |
-| Access | One manually provisioned Firebase email/password account, sign-in only, mobile web UI, persistent session | Installable PWA, offline reading |
-| Data | Persistent storage and a portable JSON export; backups before regular use | Import UI and a database migration if needs change |
+A lesson is written by Claude for this reader. It has:
 
-Do not add social features, public profiles, competitive leaderboards, native mobile apps, a conversational coach, or push notifications to the initial release. There is no clinical assessment or personalized medical guidance in the mind category.
+| Part | Content |
+| --- | --- |
+| Header | Subject, title, a one- or two-sentence hook, estimated reading minutes |
+| Body | About 2,300–3,200 words of Markdown at the standard length, with section headings; formulas for mathematics, short code blocks for computer science |
+| Illustrations | Up to three images from Wikipedia for subjects where pictures matter (artworks, places, films, people), each with a caption and source link |
+| What to remember | Three to five key ideas |
+| Glossary | Terms worth keeping, with short definitions (the main content in Words lessons) |
+| Go deeper | Three suggested follow-up directions |
+| Further | A few books, films, works, or places to explore; links are search links, never model-invented URLs |
 
-## Mobile screens
+Length is a setting: short (about 5 minutes), standard (10–15 minutes, the default),
+or long (about 20 minutes).
 
-Use bottom navigation for **Today**, **Habits**, and **Library**. Settings is reachable from the profile control. On wider screens the same information can use two columns and a sidebar; maintain the same navigation and behavior.
+Subjects in the initial catalog: Art, History, Film, Words, Geography & geopolitics,
+Science, Mathematics, Computer science, Philosophy, Literature, and Music. Each can
+be turned off in Settings without deleting its history. Every subject has its own
+writing guidance; for example, Film lessons avoid spoilers past the first act unless
+the lesson says so first, and Words lessons teach a small themed set of useful words
+with origins and example sentences.
+
+### Choosing what to teach
+
+The daily lesson and "Surprise me" pick a subject at random, weighted toward subjects
+the owner has rated well and away from the subjects of the last two lessons. Claude
+then picks the topic, given the titles already covered (to avoid repeats) and recent
+likes and dislikes (as taste hints). A requested topic skips the choice: the owner's
+words become the brief.
+
+### Follow-ups
+
+"Go deeper" creates a new lesson linked to the one being read. Claude receives the
+earlier lesson and the chosen direction or question, and continues without repeating
+the basics. A thread can keep growing; the reader shows where a lesson sits in its
+thread.
+
+### Accuracy
+
+Lessons come from the model's knowledge, not retrieved sources. The writing guidance
+asks for conservative claims, plain separation of established fact from interpretation
+or dispute, and explicit uncertainty about dates and figures. Images and their links
+come from Wikipedia records the worker looks up, not from the model. A lesson is
+reading material, not a reference; the owner can flag one that looks wrong, which
+records the concern for later review.
+
+## Activity record
+
+Every meaningful action is stored as a timestamped event with the owner's local date:
+
+- app opened; lesson requested, prepared, opened, read (time and how far), finished,
+  saved or unsaved, rated, flagged, expanded into a follow-up;
+- settings changed; generation failures.
+
+The record is append-only and never expires. It is available through the API, a
+JSON export, and a command-line tool, so a later Claude session can pull it to tune
+subject weights and prompts, write weekly or monthly recaps, or point out patterns
+in what the owner reads. Events contain lesson IDs and subjects; the only free text
+is the owner's own topic requests, questions, and notes on flagged lessons.
+
+## Screens
+
+Bottom navigation: **Today**, **Library**, **Progress**. Settings opens from Progress.
+Wider screens keep the same structure with a centered reading column.
 
 ### Today
 
-Place the date and today's habit progress at the top, then the habit list, then discoveries. Each habit shows its name, a large completion control, and an optional short cue such as “After breakfast.” A completed row stays in place to avoid moving targets under the thumb.
+The date, set like the masthead of an almanac, then today's lesson: subject, title,
+hook, reading time, and a clear way to begin. While it is being prepared the page says
+so plainly and updates itself. Below it: unfinished lessons to continue, and "Another
+lesson" with Surprise me, a subject list, and a box to ask for any topic. The remaining
+lessons allowed today are shown only when the limit is close.
 
-Use a compact “2 of 3 today” indicator and a seven-day row of progress circles. Each day's fill represents completed scheduled habits. A day with no scheduled habits is neutral. Avoid adding several charts to the home screen.
+### Lesson reader
 
-Show five compact discovery previews in a vertical list: category, title, one-line hook, and reading time. Artwork gets a thumbnail. Opening a preview reveals the full card with sources and a favorite control. There is no infinite feed and no requirement to open every card.
-
-Conceptual arrangement, not a visual specification:
-
-```text
-Ataraxia                       Profile
-Thursday, 8 October
-
-Today                         2 of 3
-  ● Read for ten minutes
-  ● Go for a walk
-  ○ Write a short reflection
-  M   T   W   T   F   S   S
-  ●   ◐   ●   ◐   ·   ·   ·
-
-Discover something
-  Word       [word and short definition]
-  Artwork    [thumbnail, title, artist]
-  History    [event and year]
-  Mind       [question and takeaway]
-  ML paper   [title and short summary]
-
-Today          Habits          Library
-```
-
-### Habits
-
-The overview lists active habits and recent consistency. Select a habit to see its month calendar, completion total, and recent weekly trend. A selector changes habits without leaving the calendar. Archived habits remain accessible through a filter.
-
-Calendar cells display the day number with a circle when completed. Use these states consistently:
-
-| State | Appearance and behavior |
-| --- | --- |
-| Completed scheduled day | Filled circle and accessible “completed” label |
-| Today, scheduled and incomplete | Outlined circle, tappable |
-| Past scheduled day, incomplete | Empty ring, neutral label “not recorded” |
-| Unscheduled day | Muted day number, no completion ring |
-| Future day | Muted day number; completion disabled |
-
-Highlight today with a separate outline that remains visible when completed. Do not rely on red versus green to communicate state. A day picker on small screens can show the full label and an explicit Complete/Undo control.
+A narrow column of serif text with comfortable size and line spacing, a thin reading
+progress line, and minimal chrome: back, save, and a menu (flag a problem). The end
+of the lesson holds What to remember, the glossary, Further, Go deeper, the rating
+control, and Mark as finished.
 
 ### Library
 
-History is automatic: every published daily card enters the Library even if it has not been opened. A star means favorite, not save. This distinction avoids losing discoveries because a save button was missed.
+Every lesson ever prepared, newest first, grouped by month. Filters: Saved, subject,
+and text search over titles, hooks, and tags. Rows show subject, title, reading time,
+and finished/saved state. Threads are visible as "Part 2 of …".
 
-Default to recent-first compact rows grouped by discovery date. Offer category chips, a favorites filter, a date range, and search over title, summary, tags, and useful metadata such as artist or paper author. Artwork rows include thumbnails; word rows include their short definitions. Opening a row shows the original full card and its sources. Keep read state separate from favorites.
+### Progress
 
-### Settings and first use
+Current and longest streak (days with a finished lesson), lessons finished, minutes
+read, a breakdown by subject, and a calendar of recent weeks. This is where "which
+subjects have I learned about" is answered. Settings and sign-out are reached from
+here.
 
-The owner creates their account in the Firebase console before use. The app has an email/password sign-in screen and sign-out; it has no registration, invitation, or account-management flow. Disable end-user sign-up in Firebase settings as well. Password resets and account maintenance are handled through Firebase administration for this release.
+### Settings
 
-On first sign-in, confirm the IANA time zone suggested by the browser, then invite creation of the first habit. Default to English. All five discovery categories start enabled; individual categories can be disabled later without deleting their history. Include export, sign-out, and an optional streak-display toggle. Changes to category selection affect unpublished slots and future days; ready cards stay in history.
+Time zone (suggested from the browser on first run), subjects on/off, lesson length,
+whether to prepare a lesson each morning and at what hour, and data export.
 
-## Habit behavior
+### Sign-in
 
-A habit has a name, optional description/cue, optional color, a start date, and a schedule: every day or a chosen set of weekdays. Suggested names describe an achievable behavior, such as “Read for ten minutes.” The user decides whether the intended behavior was achieved; completion is binary in this release.
+Email and password through Firebase for the one account the owner created in the
+Firebase console. There is no registration, invitation, or account-management flow,
+and end-user sign-up is disabled in Firebase. Local development can run without
+sign-in; see [architecture](architecture.md#authentication).
 
-- One completion per habit per local date. Repeating Complete has no additional effect; repeating Undo also has no additional effect.
-- Creation starts today by default, with an optional earlier start date for backfilling. Completion is allowed only on scheduled dates from the start date through today.
-- Past days can be corrected. Future dates cannot be completed. A missing record on a past due date means “not recorded,” rather than a claim about what the person actually did.
-- Schedule edits take effect tomorrow. Keep previous schedule versions so edits do not rewrite past statistics. A pending version for tomorrow may be replaced by another edit before it takes effect.
-- Archive takes effect tomorrow; today's remaining completion can still be recorded. Keep historical data and earlier correction controls. Restoring starts a new active schedule tomorrow, leaving the archived interval unscheduled.
-- A rename changes the display name across the history. A substantial change of behavior should be a new habit; renaming does not reset earned progress.
+## Look and feel
 
-The user profile's time zone defines today. Store completion dates directly as local dates and event timestamps in UTC. A time zone change affects subsequent calculations of today; existing date labels and daily cards are not moved or regenerated. This is sufficient for personal use without a travel-history model.
+Pleasant, calm, and specific to reading:
 
-### Statistics and motivation
+- warm paper and ink colors with a matching dark theme; one muted pigment color per
+  subject used sparingly for labels, rules, and progress;
+- a screen-designed serif for reading and headlines, a clean sans-serif for interface
+  labels; generous margins and line spacing; a reading column of about 65 characters;
+- small, quiet motion (fade and slide between screens, progress line), disabled for
+  reduced-motion users;
+- no gradients, glass effects, emoji, or generic dashboard cards.
 
-Show today's completion count and the last seven completed local days' consistency. Consistency equals completed scheduled opportunities divided by scheduled opportunities in that window. Exclude today from this percentage while it is in progress. Show “No scheduled days” instead of zero percent when the denominator is zero.
+Design for a 360-pixel-wide phone, 44-pixel touch targets, visible focus, keyboard
+use, and semantic controls. Dedicated screen-reader audits are deferred. The app can
+be added to the phone's home screen; offline reading is deferred.
 
-For a habit scheduled Monday, Wednesday, and Friday, completing Monday and Wednesday out of a finished week gives 2/3. Tuesday is neither a miss nor an extra success. Aggregate progress sums opportunities across habits; it is not the average of their individual percentages.
+## Limits and failure states
 
-Optional streaks count consecutive completed scheduled dates. Unscheduled dates do not break a streak; an incomplete today does not break it until the day ends. Archive intervals end a streak, while total completions remain. Backfills and undo recalculate streaks and statistics.
+- A daily cap on prepared lessons (default 8) protects the owner's Claude usage. The
+  morning lesson counts toward it. Reaching it disables new requests until tomorrow.
+- At most three lessons can be waiting at once.
+- If Claude's usage limit is reached, the lesson waits and tries again on its own
+  every half hour, and the card says so.
+- If preparation fails, the lesson card says why in plain words (Claude is not signed
+  in on the server, or a generation problem) and offers a retry. Other lessons and
+  the Library keep working.
+- A lesson, once prepared, does not change. There is no "reroll"; ask for another.
 
-Use milestone thresholds of 7, 30, and 100 total completions per habit, with restrained celebration and reduced-motion support. Milestones are derived from completion history; undo can remove a threshold. Do not store a separate points balance or make corrections generate repeated rewards.
+## Later
 
-The default experience emphasizes returning after a gap and visible accumulated effort. A missed day does not erase total progress, incur a debt, or trigger reprimands. These are design preferences, not claims that a particular mechanic is proven to form habits.
+Candidates once the daily loop has been used for a few weeks, roughly in order:
 
-## Discovery cards
+1. Quizzes and spaced review drawn from finished lessons' key ideas.
+2. Weekly or monthly recaps written from the activity record.
+3. Habit tracking (the earlier design: binary habits, schedules, calendar, streaks),
+   recovered from Git history when wanted.
+4. Retrieval-backed lessons for subjects where accuracy matters most.
 
-| Category | Card content |
-| --- | --- |
-| Word | Word, part of speech, plain definition, register/use note, and 2–3 original example sentences suited to real conversation or writing |
-| Artwork | Image when available with usable rights, title, artist or culture, approximate date, medium, 80–150 words of context, and a viewing prompt |
-| History | Event, actual date/year, location where known, 80–150 words on what happened and why it mattered; “On this day” only when the date matches |
-| Mind | Clear question or idea, 100–180 words, a concrete everyday connection, and an evidence limitation when relevant |
-| ML paper | Exact title, authors/year, a 100–180 word plain-language abstract summary, why it is interesting, a limitation when the supplied source supports one, and links to the paper record and full text |
-
-Lengths are targets rather than rigid UI constraints. An artwork card can be shorter when only factual collection metadata is available. Show paper summaries as summaries; do not label generated text as the authors' original abstract or invent a limitation to fill the layout. Detail screens can include a link to the original abstract. Learning about psychedelics, neurological disease, cognition, emotions, and mental health fits within the mind category as educational content.
-
-Randomness means varied selection from eligible sources, with repeat suppression and a balance of subjects. It does not mean every work or event in existence has an equal selection probability. Selection, sources, and failure behavior are specified in [Daily discoveries](discoveries.md).
-
-## Accessibility and failure states
-
-Design for a 360-pixel-wide phone, comfortable text, visible focus, semantic buttons, at least 44-pixel touch targets, and light/dark themes. Support keyboard use; dedicated screen-reader audits and polish are deferred for this personal app. Artwork uses contain-style images so the whole work can be inspected, with a full-image link. Keep reading layouts narrow enough for comfortable prose.
-
-Habit completion responds optimistically, indicates a pending save, and rolls back with a concise retry message on failure. Serialize changes for the same habit/day while a save is pending and refetch authoritative state after an uncertain outcome. A network failure must not leave a false completed circle. Disable new changes while the browser reports offline; do not persist or automatically replay an offline mutation queue. Offline writes and synchronization are deferred.
-
-Discovery generation can show “Preparing today's selection” and update independently of habits. One failed category does not block the others. If a card cannot be produced, show a retry state and access to previous cards. Never present yesterday's card as today's. Source images can fail independently: retain the text, attribution, and source link.
-
-## How to judge the first release
-
-The app succeeds if its owner can record today's habits without navigating, inspect a month of accurate circles, and quickly find an old discovery. Verify this on an actual phone. After two weeks of use, review whether the calendar and milestones encourage return, whether the reading load feels manageable, and which cards are worth revisiting before adding new mechanics.
-
-The most promising follow-ups are flexible weekly targets, a weekly reflection, and one optional recall question drawn from saved discoveries. Build them only after the basic loop is useful.
+No social features, public profiles, conversational coach, or push notifications.

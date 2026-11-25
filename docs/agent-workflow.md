@@ -1,8 +1,8 @@
 # Agent delivery loop
 
-The owner chooses product direction, reviews the finished PR stack, merges, and
-tests the app. The agent implements, verifies, reviews, fixes, and records follow-up
-work. This is the delivery policy; no recurring runner is enabled by this document.
+The owner chooses product direction and tests the app. The agent implements,
+verifies, reviews, fixes, records follow-up work, and merges reviewed PRs whose checks
+pass (authorized by the owner on 24 November 2026). This is the delivery policy; no recurring runner is enabled by this document.
 
 ## One increment
 
@@ -11,7 +11,7 @@ work. This is the delivery policy; no recurring runner is enabled by this docume
    an existing stack before starting another. Use a separate worktree for unrelated work.
 2. Choose one authorized roadmap increment. Prefer a native GitHub stack of small,
    coherent, runnable PRs for dependent changes or an increment that benefits from separate
-   reviews. Keep a small self-contained change in one PR. Use `codex/` branches;
+   reviews. Keep a small self-contained change in one PR. Use `claude/` branches;
    the first PR targets the integration branch (normally `main`), and each dependent
    PR targets its actual parent branch. Record parent links and bottom-to-top order
    in PR descriptions and the handoff. Begin with one active stack.
@@ -37,8 +37,8 @@ work. This is the delivery policy; no recurring runner is enabled by this docume
    reconcile GitHub's stack state and restack/retarget descendants as needed. Verify
    each diff contains only its own increment. Recheck affected behavior and CI;
    preserve unrelated work and never overwrite another contributor's commits.
-   Save a handoff and report the verified native stack number and PR order. Leave
-   merging and application acceptance to the owner.
+   Merge once review findings are resolved and checks pass, then save a handoff.
+   Application acceptance stays with the owner.
 
 If review/fix cycles make no progress, capture the exact blocker instead of looping
 indefinitely. After two unsuccessful attempts at the same failure, change approach
@@ -61,7 +61,11 @@ Dependent branches alone do not create a GitHub stack. Use the
 
 Use `Accept: application/vnd.github+json` and `X-GitHub-Api-Version: 2026-03-10`.
 If registration is unavailable, report the blocker instead of claiming a completed stack.
-The owner can [merge a contiguous group through GitHub's stack UI](https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/merging-stacked-pull-requests).
+Stacked PRs cannot be merged with the classic merge endpoint. Use
+`PUT /repos/{owner}/{repo}/pulls/{pr_number}/merge-async` with `merge_method`,
+`merge_action: direct_merge`, and the expected head `sha`; it merges that PR and every
+open PR below it. Poll `GET .../merge-async/{uuid}` until `merged` or `failed`. The
+owner can also [merge through GitHub's stack UI](https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/merging-stacked-pull-requests).
 Reconcile GitHub's automatic rebasing before making local branch changes.
 
 ## Scope of automatic fixes
@@ -101,9 +105,9 @@ by [Codex](https://developers.openai.com/codex/skills),
 First validate this loop on a real increment. Then a local scheduled run can read
 the same roadmap and resume the open stack, or take the next explicitly enabled
 item. It must reconcile current remote state, avoid duplicate PRs/issues, use an
-isolated worktree, and stop at a finished stack or a concrete blocker. Notify only
-for a new ready stack, meaningful failure, or needed decision; stay quiet while
-waiting for the same unmerged stack. Never merge, deploy, or provision resources.
+isolated worktree, and stop at a merged increment or a concrete blocker. Notify only
+for newly merged work, meaningful failure, or needed decision; stay quiet when
+there is nothing new. Never deploy or provision resources.
 
 Choose cadence, allowed roadmap scope, and a run budget before enabling recurrence.
 Local scheduled tasks need the computer and app running, plus working GitHub and

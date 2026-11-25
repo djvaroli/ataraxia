@@ -46,10 +46,9 @@ services:
       context: ./backend
       target: runtime
     environment: &backend-env
-      ATARAXIA_REDIS_URL: redis://redis:6379/0
-    depends_on:
-      redis:
-        condition: service_healthy
+      ATARAXIA_DATABASE_PATH: /data/ataraxia.db
+    volumes: &backend-data
+      - ataraxia-data:/data
     healthcheck:
       <<: *health
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health/ready', timeout=3)"]
@@ -59,25 +58,15 @@ services:
     build: *backend-build
     command: ["python", "-m", "ataraxia.worker"]
     environment: *backend-env
+    volumes: *backend-data
     init: true
     stop_grace_period: 10s
     depends_on:
-      redis:
+      api:
         condition: service_healthy
     healthcheck:
       <<: *health
       test: ["CMD", "python", "-m", "ataraxia.worker.healthcheck"]
 
-  redis:
-    <<: *service
-    image: redis:8.10.2-alpine
-    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
-    volumes:
-      - ./infra/redis.conf:/usr/local/etc/redis/redis.conf:ro
-      - redis-data:/data
-    healthcheck:
-      <<: *health
-      test: ["CMD", "redis-cli", "ping"]
-
 volumes:
-  redis-data:
+  ataraxia-data:

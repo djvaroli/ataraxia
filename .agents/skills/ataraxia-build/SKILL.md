@@ -12,9 +12,10 @@ Use paths relative to the selected repository, not the installed skill directory
 
 Implement the increment the user requested. If they asked to continue without
 naming one, finish the active stack before taking the next roadmap increment.
-If the stack is ready and awaiting the owner's merge, report that boundary; do not
-start unrelated work. An unattended run must have explicitly configured roadmap
-scope. No invocation is authority to merge, deploy, provision, or spend on providers.
+The owner has authorized merging reviewed PRs whose checks pass (see AGENTS.md);
+merge before starting the next increment. An unattended run must have explicitly
+configured roadmap scope. No invocation is authority to deploy, provision, or spend
+on paid providers.
 
 Follow the delivery loop through implementation, checks, independent review,
 reassessment, and fixes. Dispatch fresh reviewers under the shared `code-review`,
@@ -38,6 +39,6 @@ summarized in the PR body. Reconcile remote state before retrying publication so
 retries do not create duplicate PRs or issues. Update the roadmap's factual status
 and use `ataraxia-handoff` to save the next action and remaining owner decisions.
 
-Return the finished stack or exact blocker. The owner reviews, merges, and tests
-the app. A running background schedule is separate setup and must not be inferred
+Return the merged result or exact blocker. The owner tests the app and gives
+feedback. A running background schedule is separate setup and must not be inferred
 from a request to complete one increment.

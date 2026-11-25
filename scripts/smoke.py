@@ -1,10 +1,11 @@
-"""Exercise the real stack in a unique disposable project and Redis volume."""
+"""Exercise the real stack in a unique disposable project and data volume."""
 
 import argparse
 import json
 import os
 import subprocess
 import time
+from collections.abc import Callable
 from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
@@ -36,6 +37,29 @@ def request(base: str, path: str) -> tuple[int, str]:
             return response.status, response.read().decode()
     except HTTPError as error:
         return error.code, error.read().decode()
+
+
+def status(base: str, path: str) -> int:
+    try:
+        return request(base, path)[0]
+    except (URLError, TimeoutError):
+        return 0
+
+
+def sql(statement: str) -> str:
+    """Run SQL in the API container against the stack's own database volume."""
+    return compose(
+        "exec", "-T", "api", "python", "-m", "sqlite3", "/data/ataraxia.db", statement
+    ).strip("()', \n")
+
+
+def wait_for(check: Callable[[], bool], what: str) -> None:
+    deadline = time.monotonic() + 30
+    while time.monotonic() < deadline:
+        if check():
+            return
+        time.sleep(1)
+    raise AssertionError(f"Timed out waiting for {what}")
 
 
 def wait_ready(base: str) -> None:
@@ -74,7 +98,7 @@ def main() -> None:
         assert request(base, "/api/health/live") == (200, '{"status":"ok"}')
         wait_ready(base)
         assert request(base, "/api/v1/missing")[0] == 404
-        for service in ("frontend", "api", "worker", "redis"):
+        for service in ("frontend", "api", "worker"):
             container = compose("ps", "--quiet", service)
             ports = subprocess.check_output(
                 [
@@ -87,41 +111,22 @@ def main() -> None:
                 text=True,
             )
             assert not json.loads(ports), f"Unexpected published ports: {service}"
+        print("Routing and private ports passed", flush=True)
 
-        for setting, expected in (
-            ("appendonly", "yes"),
-            ("appendfsync", "everysec"),
-            ("maxmemory-policy", "noeviction"),
-        ):
-            assert compose(
-                "exec", "-T", "redis", "redis-cli", "--raw", "CONFIG", "GET", setting
-            ).splitlines() == [setting, expected]
-        assert (
-            compose(
-                "exec", "-T", "redis", "redis-cli", "SET", "ataraxia:smoke", "survives"
-            )
-            == "OK"
-        )
-        print(
-            "Routing, private ports, and persistence configuration passed", flush=True
-        )
-
-        compose("stop", "redis")
-        assert request(base, "/api/health/ready")[0] == 503
-        assert request(base, "/api/health/live")[0] == 200
-        assert request(base, "/")[0] == 200
-        compose("up", "--detach", "--no-deps", "--force-recreate", "redis")
-        wait_ready(base)
-        assert (
-            compose("exec", "-T", "redis", "redis-cli", "GET", "ataraxia:smoke")
-            == "survives"
-        )
+        assert sql("PRAGMA journal_mode") == "wal"
+        wait_for(lambda: sql("SELECT COUNT(*) FROM worker_status") == "1", "worker heartbeat")
+        sql("CREATE TABLE smoke_sentinel (value TEXT)")
+        sql("INSERT INTO smoke_sentinel VALUES ('survives')")
+        compose("up", "--detach", "--no-deps", "--force-recreate", "api", "worker")
         compose("up", "--detach", "--wait", "--wait-timeout", "60")
-        print("Redis recreation, persistence, and health recovery passed", flush=True)
+        wait_ready(base)
+        assert sql("SELECT value FROM smoke_sentinel") == "survives"
+        print("Database persistence across container recreation passed", flush=True)
 
         compose("up", "--detach", "--no-deps", "--force-recreate", "api", "frontend")
         wait_ready(base)
-        assert request(base, "/")[0] == 200
+        # nginx re-resolves upstream addresses every few seconds.
+        wait_for(lambda: status(base, "/") == 200, "frontend through nginx")
         print("nginx recovered after upstream recreation", flush=True)
     except BaseException:
         subprocess.run(

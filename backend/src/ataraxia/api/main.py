@@ -1,17 +1,20 @@
-"""Infrastructure health endpoints; owner-only application routes follow in A02."""
+"""HTTP application factory and infrastructure health endpoints."""
 
-import asyncio
+import logging
+import sqlite3
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from typing import Annotated, Literal, cast
 
 from fastapi import Depends, FastAPI, Request, Response
 from pydantic import BaseModel
-from redis.asyncio import Redis
-from redis.exceptions import RedisError
 
-from ataraxia.bootstrap import create_redis
+from ataraxia.adapters.sqlite.database import Database
+from ataraxia.adapters.sqlite.migrations import SCHEMA_VERSION, migrate, schema_version
+from ataraxia.bootstrap import create_database
 from ataraxia.config import Settings
+
+logger = logging.getLogger(__name__)
 
 
 class HealthStatus(BaseModel):
@@ -20,19 +23,19 @@ class HealthStatus(BaseModel):
     status: Literal["ok", "unavailable"]
 
 
-def get_redis(request: Request) -> Redis:
-    """Obtain the process client; tests can override this dependency."""
-    return cast(Redis, request.app.state.redis)
+def get_database(request: Request) -> Database:
+    """Obtain the process database; tests can override this dependency."""
+    return cast(Database, request.app.state.database)
 
 
-def create_app() -> FastAPI:
-    """Build the API without connecting to Redis at import time."""
+def create_app(database: Database | None = None) -> FastAPI:
+    """Build the API; the database is opened and migrated at startup, not import."""
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-        async with create_redis(Settings()) as redis:
-            app.state.redis = redis
-            yield
+        app.state.database = database or create_database(Settings())
+        migrate(app.state.database)
+        yield
 
     app = FastAPI(
         title="Ataraxia API",
@@ -44,19 +47,21 @@ def create_app() -> FastAPI:
     )
 
     @app.get("/api/health/live", response_model=HealthStatus)
-    async def live() -> HealthStatus:
+    def live() -> HealthStatus:
         return HealthStatus(status="ok")
 
     @app.get(
         "/api/health/ready", response_model=HealthStatus, responses={503: {"model": HealthStatus}}
     )
-    async def ready(
-        response: Response, redis: Annotated[Redis, Depends(get_redis)]
+    def ready(
+        response: Response, database: Annotated[Database, Depends(get_database)]
     ) -> HealthStatus:
         try:
-            async with asyncio.timeout(3):
-                await redis.ping()
-        except (RedisError, TimeoutError):
+            current = schema_version(database)
+        except sqlite3.Error:
+            logger.warning("Readiness check could not read the database")
+            current = -1
+        if current != SCHEMA_VERSION:
             response.status_code = 503
             return HealthStatus(status="unavailable")
         return HealthStatus(status="ok")

@@ -1,1 +1,1 @@
-"""Single-process worker; discovery scheduling is introduced in A05."""
+"""Single-process worker that prepares lessons."""

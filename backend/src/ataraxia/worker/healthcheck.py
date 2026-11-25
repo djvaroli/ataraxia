@@ -1,4 +1,4 @@
-"""Readiness reflects recent successful work-loop contact with Redis."""
+"""Readiness reflects recent successful work-loop contact with the database."""
 
 import time
 from pathlib import Path

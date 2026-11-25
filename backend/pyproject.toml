@@ -1,13 +1,12 @@
 [project]
 name = "ataraxia"
 version = "0.1.0"
-description = "Ataraxia API and sequential discovery worker"
+description = "Ataraxia API and sequential lesson worker"
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "fastapi==0.143.0",
     "pydantic==2.14.0",
     "pydantic-settings==2.15.0",
-    "redis==8.1.0",
     "uvicorn[standard]==0.54.0",
 ]
 
