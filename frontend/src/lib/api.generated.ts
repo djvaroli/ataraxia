@@ -38,10 +38,587 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/activity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Activity */
+        get: operations["list_activity_api_v1_activity_get"];
+        put?: never;
+        /** Record Client Event */
+        post: operations["record_client_event_api_v1_activity_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/client-config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Client Config */
+        get: operations["client_config_api_v1_client_config_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Export */
+        get: operations["export_api_v1_export_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/jobs/{job_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Job */
+        get: operations["get_job_api_v1_jobs__job_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/jobs/{job_id}/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Retry Job */
+        post: operations["retry_job_api_v1_jobs__job_id__retry_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/lessons": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Lessons */
+        get: operations["list_lessons_api_v1_lessons_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/lessons/requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Request Lesson */
+        post: operations["request_lesson_api_v1_lessons_requests_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/lessons/{lesson_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Lesson */
+        get: operations["get_lesson_api_v1_lessons__lesson_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/lessons/{lesson_id}/finished": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Set Finished */
+        put: operations["set_finished_api_v1_lessons__lesson_id__finished_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/lessons/{lesson_id}/flag": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Set Flag */
+        put: operations["set_flag_api_v1_lessons__lesson_id__flag_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/lessons/{lesson_id}/follow-ups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Request Follow Up */
+        post: operations["request_follow_up_api_v1_lessons__lesson_id__follow_ups_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/lessons/{lesson_id}/opened": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Record Opened */
+        post: operations["record_opened_api_v1_lessons__lesson_id__opened_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/lessons/{lesson_id}/rating": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Set Rating */
+        put: operations["set_rating_api_v1_lessons__lesson_id__rating_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/lessons/{lesson_id}/reading": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Record Reading */
+        post: operations["record_reading_api_v1_lessons__lesson_id__reading_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/lessons/{lesson_id}/saved": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Set Saved */
+        put: operations["set_saved_api_v1_lessons__lesson_id__saved_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Me */
+        get: operations["get_me_api_v1_me_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Me */
+        patch: operations["update_me_api_v1_me_patch"];
+        trace?: never;
+    };
+    "/api/v1/progress": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Progress */
+        get: operations["get_progress_api_v1_progress_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/today": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Today */
+        get: operations["get_today_api_v1_today_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/today/lesson": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Ensure Daily Lesson
+         * @description Queue today's daily lesson unless it exists or is already queued.
+         */
+        post: operations["ensure_daily_lesson_api_v1_today_lesson_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** ActivityEvent */
+        ActivityEvent: {
+            /** Data */
+            data: {
+                [key: string]: components["schemas"]["JsonValue"];
+            };
+            /** Id */
+            id: number;
+            /** Lesson Id */
+            lesson_id: string | null;
+            /**
+             * Local Date
+             * Format: date
+             */
+            local_date: string;
+            /**
+             * Occurred At
+             * Format: date-time
+             */
+            occurred_at: string;
+            /** Subject */
+            subject: ("art" | "history" | "film" | "words" | "geography" | "science" | "math" | "computing" | "philosophy" | "literature" | "music") | null;
+            /** Type */
+            type: string;
+        };
+        /** ActivityPage */
+        ActivityPage: {
+            /** Items */
+            items: components["schemas"]["ActivityEvent"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+        };
+        /** Allowance */
+        Allowance: {
+            /** Limit */
+            limit: number;
+            /** Remaining */
+            remaining: number;
+            /** Used */
+            used: number;
+            /**
+             * Waiting
+             * @description Jobs currently queued or running.
+             */
+            waiting: number;
+            /** Waiting Limit */
+            waiting_limit: number;
+        };
+        /** ClientConfig */
+        ClientConfig: {
+            /**
+             * Auth Mode
+             * @enum {string}
+             */
+            auth_mode: "firebase" | "local";
+            firebase: components["schemas"]["FirebaseWebConfig"] | null;
+        };
+        /** ClientEvent */
+        ClientEvent: {
+            /**
+             * Type
+             * @constant
+             */
+            type: "app.opened";
+        };
+        /**
+         * DailySlot
+         * @description Today's daily lesson. `waiting` means the morning hour has not arrived yet;
+         *     `not_scheduled` means the morning lesson is off and none was requested.
+         */
+        DailySlot: {
+            job: components["schemas"]["Job"] | null;
+            lesson: components["schemas"]["LessonSummary"] | null;
+            /** Morning Hour */
+            morning_hour: number | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "not_scheduled" | "waiting" | "queued" | "running" | "ready" | "failed";
+        };
+        /** DayActivity */
+        DayActivity: {
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /** Finished */
+            finished: number;
+            /** Read Minutes */
+            read_minutes: number;
+        };
+        /**
+         * Direction
+         * @description A suggested follow-up the reader can choose under "Go deeper".
+         */
+        Direction: {
+            /** Description */
+            description: string;
+            /** Title */
+            title: string;
+        };
+        /**
+         * ErrorBody
+         * @description Every 4xx/5xx application error has this shape.
+         */
+        ErrorBody: {
+            error: components["schemas"]["ErrorDetail"];
+        };
+        /** ErrorDetail */
+        ErrorDetail: {
+            /**
+             * Code
+             * @enum {string}
+             */
+            code: "unauthenticated" | "forbidden" | "not_found" | "validation_failed" | "conflict" | "daily_limit" | "too_many_waiting" | "unavailable";
+            /**
+             * Fields
+             * @default []
+             */
+            fields: components["schemas"]["FieldError"][];
+            /** Message */
+            message: string;
+        };
+        /**
+         * ExportDocument
+         * @description Everything durable, for analysis and backup. `schema_version` is the database's.
+         */
+        ExportDocument: {
+            /** Calls */
+            calls: components["schemas"]["GenerationCall"][];
+            /** Events */
+            events: components["schemas"]["ActivityEvent"][];
+            /**
+             * Exported At
+             * Format: date-time
+             */
+            exported_at: string;
+            /** Jobs */
+            jobs: components["schemas"]["Job"][];
+            /** Lessons */
+            lessons: components["schemas"]["Lesson"][];
+            preferences: components["schemas"]["Preferences"];
+            /** Schema Version */
+            schema_version: number;
+        };
+        /** FieldError */
+        FieldError: {
+            /** Field */
+            field: string;
+            /** Message */
+            message: string;
+        };
+        /** FinishedUpdate */
+        FinishedUpdate: {
+            /** Finished */
+            finished: boolean;
+        };
+        /**
+         * FirebaseWebConfig
+         * @description Public Firebase web app configuration; not a secret.
+         */
+        FirebaseWebConfig: {
+            /** Api Key */
+            api_key: string;
+            /** App Id */
+            app_id: string;
+            /** Auth Domain */
+            auth_domain: string;
+            /** Project Id */
+            project_id: string;
+        };
+        /** FlagUpdate */
+        FlagUpdate: {
+            /**
+             * Note
+             * @default
+             */
+            note: string;
+        };
+        /**
+         * FollowUpRequest
+         * @description Exactly one of a suggested direction (by index into `go_deeper`) or a question.
+         */
+        FollowUpRequest: {
+            /** Direction */
+            direction?: number | null;
+            /** Question */
+            question?: string | null;
+        };
+        /**
+         * FurtherItem
+         * @description A book, film, work, or place to explore; the frontend builds search links.
+         */
+        FurtherItem: {
+            /** Creator */
+            creator?: string | null;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "book" | "film" | "artwork" | "music" | "place" | "article" | "other";
+            /** Note */
+            note?: string | null;
+            /** Title */
+            title: string;
+        };
+        /** GenerationCall */
+        GenerationCall: {
+            /** Cost Usd */
+            cost_usd: number | null;
+            /** Duration Ms */
+            duration_ms: number | null;
+            /** Finished At */
+            finished_at: string | null;
+            /** Id */
+            id: string;
+            /** Input Tokens */
+            input_tokens: number | null;
+            /** Job Id */
+            job_id: string;
+            /**
+             * Local Date
+             * Format: date
+             */
+            local_date: string;
+            /** Model */
+            model: string | null;
+            /** Outcome */
+            outcome: string | null;
+            /** Output Tokens */
+            output_tokens: number | null;
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at: string;
+        };
+        /**
+         * GlossaryEntry
+         * @description A term worth keeping and a short definition.
+         */
+        GlossaryEntry: {
+            /** Definition */
+            definition: string;
+            /** Term */
+            term: string;
+        };
         /**
          * HealthStatus
          * @description Public health status without connection details or credentials.
@@ -52,6 +629,425 @@ export interface components {
              * @enum {string}
              */
             status: "ok" | "unavailable";
+        };
+        /**
+         * Illustration
+         * @description A resolved image: URL on upload.wikimedia.org and the article it came from.
+         */
+        Illustration: {
+            /** Caption */
+            caption: string;
+            /** Height */
+            height?: number | null;
+            /** Image Url */
+            image_url: string;
+            /** Page Url */
+            page_url: string;
+            /** Title */
+            title: string;
+            /** Width */
+            width?: number | null;
+        };
+        /** Job */
+        Job: {
+            /** Attempts */
+            attempts: number;
+            /** Can Retry */
+            can_retry: boolean;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Error Code */
+            error_code: ("claude_auth" | "claude_usage_limit" | "claude_timeout" | "invalid_output" | "claude_error" | "daily_limit" | "interrupted") | null;
+            /**
+             * Error Message
+             * @description Plain-language explanation of a failure.
+             */
+            error_message: string | null;
+            /** Finished At */
+            finished_at: string | null;
+            /** Id */
+            id: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "daily" | "surprise" | "subject" | "topic" | "follow_up";
+            /** Lesson Id */
+            lesson_id: string | null;
+            /**
+             * Local Date
+             * Format: date
+             */
+            local_date: string;
+            /** Parent Lesson Id */
+            parent_lesson_id: string | null;
+            /** Request Text */
+            request_text: string | null;
+            /** Started At */
+            started_at: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "queued" | "running" | "succeeded" | "failed";
+            /** Subject */
+            subject: ("art" | "history" | "film" | "words" | "geography" | "science" | "math" | "computing" | "philosophy" | "literature" | "music") | null;
+        };
+        JsonValue: unknown;
+        /** Lesson */
+        Lesson: {
+            /** Body Markdown */
+            body_markdown: string;
+            /** @description First illustration, if any. */
+            cover: components["schemas"]["Illustration"] | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Further */
+            further: components["schemas"]["FurtherItem"][];
+            /** Glossary */
+            glossary: components["schemas"]["GlossaryEntry"][];
+            /** Go Deeper */
+            go_deeper: components["schemas"]["Direction"][];
+            /** Hook */
+            hook: string;
+            /** Id */
+            id: string;
+            /** Illustrations */
+            illustrations: components["schemas"]["Illustration"][];
+            /** Key Ideas */
+            key_ideas: string[];
+            /**
+             * Local Date
+             * Format: date
+             */
+            local_date: string;
+            /**
+             * Origin
+             * @enum {string}
+             */
+            origin: "daily" | "surprise" | "subject" | "topic" | "follow_up";
+            /** Parent Id */
+            parent_id: string | null;
+            /** Part */
+            part: number;
+            /** Reading Minutes */
+            reading_minutes: number;
+            /**
+             * Request Text
+             * @description The owner's topic or question, if any.
+             */
+            request_text: string | null;
+            state: components["schemas"]["LessonState"];
+            /**
+             * Subject
+             * @enum {string}
+             */
+            subject: "art" | "history" | "film" | "words" | "geography" | "science" | "math" | "computing" | "philosophy" | "literature" | "music";
+            /** Tags */
+            tags: string[];
+            /**
+             * Thread
+             * @description Every lesson in this thread, oldest first, including this one.
+             */
+            thread: components["schemas"]["ThreadEntry"][];
+            /** Thread Root Id */
+            thread_root_id: string;
+            /** Title */
+            title: string;
+        };
+        /** LessonPage */
+        LessonPage: {
+            /** Items */
+            items: components["schemas"]["LessonSummary"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+        };
+        /** LessonState */
+        LessonState: {
+            /** Finished At */
+            finished_at: string | null;
+            /** First Opened At */
+            first_opened_at: string | null;
+            /** Flagged */
+            flagged: boolean;
+            /** Furthest Scroll */
+            furthest_scroll: number;
+            /**
+             * Rating
+             * @enum {integer}
+             */
+            rating: -1 | 0 | 1;
+            /** Read Seconds */
+            read_seconds: number;
+            /** Saved */
+            saved: boolean;
+            /** Saved At */
+            saved_at: string | null;
+        };
+        /** LessonSummary */
+        LessonSummary: {
+            /** @description First illustration, if any. */
+            cover: components["schemas"]["Illustration"] | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Hook */
+            hook: string;
+            /** Id */
+            id: string;
+            /**
+             * Local Date
+             * Format: date
+             */
+            local_date: string;
+            /**
+             * Origin
+             * @enum {string}
+             */
+            origin: "daily" | "surprise" | "subject" | "topic" | "follow_up";
+            /** Parent Id */
+            parent_id: string | null;
+            /** Part */
+            part: number;
+            /** Reading Minutes */
+            reading_minutes: number;
+            state: components["schemas"]["LessonState"];
+            /**
+             * Subject
+             * @enum {string}
+             */
+            subject: "art" | "history" | "film" | "words" | "geography" | "science" | "math" | "computing" | "philosophy" | "literature" | "music";
+            /** Tags */
+            tags: string[];
+            /** Thread Root Id */
+            thread_root_id: string;
+            /** Title */
+            title: string;
+        };
+        /** Me */
+        Me: {
+            /**
+             * Auth Mode
+             * @enum {string}
+             */
+            auth_mode: "firebase" | "local";
+            /** Catalog */
+            catalog: components["schemas"]["SubjectInfo"][];
+            /** Lessons Per Day */
+            lessons_per_day: number;
+            preferences: components["schemas"]["Preferences"];
+        };
+        /** Preferences */
+        Preferences: {
+            /**
+             * Lesson Length
+             * @enum {string}
+             */
+            lesson_length: "short" | "standard" | "long";
+            /** Morning Hour */
+            morning_hour: number;
+            /** Morning Lesson */
+            morning_lesson: boolean;
+            /**
+             * Subjects
+             * @description Enabled subjects, in catalog order.
+             */
+            subjects: ("art" | "history" | "film" | "words" | "geography" | "science" | "math" | "computing" | "philosophy" | "literature" | "music")[];
+            /** Time Zone */
+            time_zone: string;
+            /**
+             * Time Zone Confirmed
+             * @description False until the owner or the browser has set the time zone.
+             */
+            time_zone_confirmed: boolean;
+        };
+        /**
+         * PreferencesUpdate
+         * @description Fields left out stay unchanged. The time zone must be an IANA name.
+         */
+        PreferencesUpdate: {
+            /** Lesson Length */
+            lesson_length?: ("short" | "standard" | "long") | null;
+            /** Morning Hour */
+            morning_hour?: number | null;
+            /** Morning Lesson */
+            morning_lesson?: boolean | null;
+            /** Subjects */
+            subjects?: ("art" | "history" | "film" | "words" | "geography" | "science" | "math" | "computing" | "philosophy" | "literature" | "music")[] | null;
+            /** Time Zone */
+            time_zone?: string | null;
+        };
+        /** Progress */
+        Progress: {
+            /**
+             * Current Streak
+             * @description Consecutive days with a finished lesson, ending today or yesterday.
+             */
+            current_streak: number;
+            /**
+             * Days
+             * @description The last 84 local days, oldest first.
+             */
+            days: components["schemas"]["DayActivity"][];
+            /** Finished Total */
+            finished_total: number;
+            /** Lessons Total */
+            lessons_total: number;
+            /** Longest Streak */
+            longest_streak: number;
+            /** Read Minutes Total */
+            read_minutes_total: number;
+            /** Saved Total */
+            saved_total: number;
+            /**
+             * Subjects
+             * @description Every catalog subject, catalog order.
+             */
+            subjects: components["schemas"]["SubjectProgress"][];
+        };
+        /** RatingUpdate */
+        RatingUpdate: {
+            /**
+             * Rating
+             * @enum {integer}
+             */
+            rating: -1 | 0 | 1;
+        };
+        /**
+         * ReadingReport
+         * @description One reading interval, sent when the reader is left or hidden.
+         */
+        ReadingReport: {
+            /** Scroll */
+            scroll: number;
+            /** Seconds */
+            seconds: number;
+        };
+        /** SavedUpdate */
+        SavedUpdate: {
+            /** Saved */
+            saved: boolean;
+        };
+        /** SubjectInfo */
+        SubjectInfo: {
+            /** Description */
+            description: string;
+            /**
+             * Id
+             * @enum {string}
+             */
+            id: "art" | "history" | "film" | "words" | "geography" | "science" | "math" | "computing" | "philosophy" | "literature" | "music";
+            /** Label */
+            label: string;
+        };
+        /** SubjectProgress */
+        SubjectProgress: {
+            /** Disliked */
+            disliked: number;
+            /** Finished */
+            finished: number;
+            /** Last Finished On */
+            last_finished_on: string | null;
+            /** Lessons */
+            lessons: number;
+            /** Liked */
+            liked: number;
+            /** Read Minutes */
+            read_minutes: number;
+            /**
+             * Subject
+             * @enum {string}
+             */
+            subject: "art" | "history" | "film" | "words" | "geography" | "science" | "math" | "computing" | "philosophy" | "literature" | "music";
+        };
+        /** SubjectRequest */
+        SubjectRequest: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "subject";
+            /**
+             * Subject
+             * @enum {string}
+             */
+            subject: "art" | "history" | "film" | "words" | "geography" | "science" | "math" | "computing" | "philosophy" | "literature" | "music";
+        };
+        /** SurpriseRequest */
+        SurpriseRequest: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "surprise";
+        };
+        /** ThreadEntry */
+        ThreadEntry: {
+            /** Id */
+            id: string;
+            /** Parent Id */
+            parent_id: string | null;
+            /**
+             * Part
+             * @description 1 for the first lesson, 2 for its follow-ups, and so on.
+             */
+            part: number;
+            /** Title */
+            title: string;
+        };
+        /** Today */
+        Today: {
+            allowance: components["schemas"]["Allowance"];
+            daily: components["schemas"]["DailySlot"];
+            /**
+             * Jobs
+             * @description Today's other jobs that are queued, running, or failed, newest first.
+             */
+            jobs: components["schemas"]["Job"][];
+            /**
+             * Local Date
+             * Format: date
+             */
+            local_date: string;
+            /**
+             * Unfinished
+             * @description Opened but unfinished lessons from the last 14 days, newest first, max 5.
+             */
+            unfinished: components["schemas"]["LessonSummary"][];
+            worker: components["schemas"]["WorkerStatus"];
+        };
+        /** TopicRequest */
+        TopicRequest: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "topic";
+            /** Topic */
+            topic: string;
+        };
+        /** WorkerStatus */
+        WorkerStatus: {
+            /** Heartbeat At */
+            heartbeat_at: string | null;
+            /**
+             * Login Expires At
+             * @description When the worker's Claude login ends, if the CLI reported it.
+             */
+            login_expires_at: string | null;
+            /**
+             * Online
+             * @description A heartbeat arrived in the last 30 seconds.
+             */
+            online: boolean;
         };
     };
     responses: never;
@@ -107,6 +1103,1110 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HealthStatus"];
+                };
+            };
+        };
+    };
+    list_activity_api_v1_activity_get: {
+        parameters: {
+            query?: {
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivityPage"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    record_client_event_api_v1_activity_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClientEvent"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    client_config_api_v1_client_config_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClientConfig"];
+                };
+            };
+        };
+    };
+    export_api_v1_export_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExportDocument"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    get_job_api_v1_jobs__job_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Job"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    retry_job_api_v1_jobs__job_id__retry_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Job"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    list_lessons_api_v1_lessons_get: {
+        parameters: {
+            query?: {
+                saved?: boolean | null;
+                subject?: ("art" | "history" | "film" | "words" | "geography" | "science" | "math" | "computing" | "philosophy" | "literature" | "music") | null;
+                q?: string | null;
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LessonPage"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    request_lesson_api_v1_lessons_requests_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SurpriseRequest"] | components["schemas"]["SubjectRequest"] | components["schemas"]["TopicRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Job"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    get_lesson_api_v1_lessons__lesson_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                lesson_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Lesson"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    set_finished_api_v1_lessons__lesson_id__finished_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                lesson_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FinishedUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LessonState"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    set_flag_api_v1_lessons__lesson_id__flag_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                lesson_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FlagUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LessonState"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    request_follow_up_api_v1_lessons__lesson_id__follow_ups_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                lesson_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FollowUpRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Job"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    record_opened_api_v1_lessons__lesson_id__opened_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                lesson_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LessonState"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    set_rating_api_v1_lessons__lesson_id__rating_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                lesson_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RatingUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LessonState"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    record_reading_api_v1_lessons__lesson_id__reading_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                lesson_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReadingReport"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LessonState"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    set_saved_api_v1_lessons__lesson_id__saved_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                lesson_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SavedUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LessonState"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    get_me_api_v1_me_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Me"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    update_me_api_v1_me_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreferencesUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Me"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    get_progress_api_v1_progress_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Progress"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    get_today_api_v1_today_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Today"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    ensure_daily_lesson_api_v1_today_lesson_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DailySlot"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
                 };
             };
         };

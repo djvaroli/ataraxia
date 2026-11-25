@@ -11,6 +11,7 @@ from pydantic import BaseModel
 
 from ataraxia.adapters.sqlite.database import Database
 from ataraxia.adapters.sqlite.migrations import SCHEMA_VERSION, migrate, schema_version
+from ataraxia.api import routes
 from ataraxia.bootstrap import create_database
 from ataraxia.config import Settings
 
@@ -66,6 +67,8 @@ def create_app(database: Database | None = None) -> FastAPI:
             return HealthStatus(status="unavailable")
         return HealthStatus(status="ok")
 
+    app.include_router(routes.public)
+    app.include_router(routes.router)
     return app
 
 
