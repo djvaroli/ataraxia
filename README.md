@@ -10,8 +10,9 @@ The app runs in Docker on one machine, uses the owner's Claude subscription thro
 the Claude Code CLI, and is reached from a phone over a private network with Firebase
 sign-in. It is an independent project, entirely separate from Osmy.
 
-Status, 24 November 2026: the runnable shell from A01 is merged; the lessons plan
-(L01) is in review and L02–L06 follow. See the [roadmap](docs/roadmap.md).
+Status, 25 November 2026: the lesson loop, reader, Library, Progress, activity record,
+and Claude worker (L01–L05) run locally. Phone access on a VM (L06) is next. See the
+[roadmap](docs/roadmap.md).
 Contributors and coding agents follow [AGENTS.md](AGENTS.md) and the
 [agent delivery loop](docs/agent-workflow.md).
 
